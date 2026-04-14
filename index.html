@@ -213,16 +213,17 @@ body::before{
 /* ─── BOARD ─── */
 .board{
   display:flex;gap:1rem;padding:0 2rem 2rem;
-  min-height:calc(100vh - 310px);position:relative;z-index:1;overflow-x:auto;
+  height:calc(100vh - 310px);position:relative;z-index:1;overflow-x:auto;
+  overflow-y:hidden;
 }
 .board::-webkit-scrollbar{height:6px}
 .board::-webkit-scrollbar-track{background:transparent}
 .board::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
-.column{flex:1;min-width:280px;max-width:340px;display:flex;flex-direction:column;}
+.column{flex:1;min-width:280px;max-width:340px;display:flex;flex-direction:column;height:100%;}
 .column-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:.85rem 0;margin-bottom:.5rem;position:sticky;top:68px;z-index:10;
+  padding:.85rem 0;margin-bottom:.5rem;flex-shrink:0;
 }
 .column-title-group{display:flex;align-items:center;gap:.6rem;}
 .column-dot{width:10px;height:10px;border-radius:50%;}
@@ -244,7 +245,11 @@ body::before{
 .card-list{
   flex:1;display:flex;flex-direction:column;gap:.6rem;
   min-height:80px;padding:.35rem;border-radius:var(--radius);transition:background .2s;
+  overflow-y:auto;overflow-x:hidden;
 }
+.card-list::-webkit-scrollbar{width:4px}
+.card-list::-webkit-scrollbar-track{background:transparent}
+.card-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 .card-list.drag-over{
   background:var(--bg-secondary);outline:2px dashed var(--border-light);
   outline-offset:-2px;border-radius:var(--radius);
