@@ -313,10 +313,15 @@ body::before{
 .card-date svg{width:13px;height:13px;}
 .card-date.overdue{color:var(--red);}
 .card-date.soon{color:var(--amber);}
+.avatar-group{display:flex;align-items:center;flex-direction:row-reverse;gap:0;}
+.avatar-group .avatar{margin-left:-8px;border:2px solid var(--bg-card);position:relative;z-index:1;}
+.avatar-group .avatar:last-child{margin-left:0;}
+.avatar-group .avatar:hover{z-index:5;transform:scale(1.15);}
 .avatar{
-  width:26px;height:26px;border-radius:50%;
+  width:28px;height:28px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   font-size:.6rem;font-weight:700;color:var(--bg-deep);flex-shrink:0;
+  transition:var(--transition);cursor:default;
 }
 .avatar.av-1{background:linear-gradient(135deg,#4d8ef7,#2563eb)}
 .avatar.av-2{background:linear-gradient(135deg,#e8a427,#d4911e)}
@@ -324,6 +329,60 @@ body::before{
 .avatar.av-4{background:linear-gradient(135deg,#9b72f2,#7c53d6)}
 .avatar.av-5{background:linear-gradient(135deg,#ef5466,#d63a4c)}
 .avatar.av-6{background:linear-gradient(135deg,#22c9a8,#14967e)}
+
+/* Add person button on card */
+.add-person-btn{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--bg-elevated);border:2px dashed var(--border-light);
+  color:var(--text-muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;transition:var(--transition);flex-shrink:0;
+  margin-left:-8px;position:relative;z-index:0;
+}
+.add-person-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--amber-bg);}
+
+/* Person picker dropdown */
+.person-picker{
+  position:absolute;bottom:calc(100% + 6px);right:0;
+  background:var(--bg-elevated);border:1px solid var(--border-light);
+  border-radius:var(--radius);padding:.4rem;min-width:180px;
+  box-shadow:var(--shadow-lg);z-index:999;display:none;
+}
+.person-picker.show{display:block;}
+.person-picker-title{
+  font-family:'Outfit',sans-serif;font-size:.7rem;font-weight:600;
+  color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;
+  padding:.3rem .5rem .4rem;
+}
+.person-picker-item{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.4rem .5rem;border-radius:6px;cursor:pointer;
+  transition:var(--transition);font-size:.82rem;color:var(--text-secondary);
+  background:none;border:none;width:100%;text-align:left;
+  font-family:'DM Sans',sans-serif;
+}
+.person-picker-item:hover{background:var(--bg-secondary);color:var(--text-primary);}
+.person-picker-item .avatar{width:22px;height:22px;font-size:.5rem;border:none;}
+.person-picker-item .check-mark{
+  margin-left:auto;color:var(--accent);font-size:.75rem;opacity:0;
+}
+.person-picker-item.selected .check-mark{opacity:1;}
+.person-picker-item.selected{color:var(--text-primary);}
+
+/* Assignees in modal */
+.assignees-grid{
+  display:flex;flex-wrap:wrap;gap:.5rem;
+}
+.assignee-chip{
+  display:flex;align-items:center;gap:.4rem;
+  padding:.35rem .65rem .35rem .35rem;
+  border-radius:20px;background:var(--bg-secondary);border:2px solid var(--border);
+  cursor:pointer;transition:var(--transition);font-size:.8rem;color:var(--text-secondary);
+  font-family:'DM Sans',sans-serif;user-select:none;
+}
+.assignee-chip:hover{border-color:var(--border-light);color:var(--text-primary);}
+.assignee-chip.selected{border-color:var(--accent);background:var(--amber-bg);color:var(--text-primary);}
+.assignee-chip .avatar{width:22px;height:22px;font-size:.5rem;border:none;}
 
 /* ─── CONTEXT MENU ─── */
 .context-menu{
@@ -648,13 +707,8 @@ body::before{
           <input type="date" id="taskDate">
         </div>
         <div class="form-group">
-          <label>Responsável</label>
-          <select id="taskAssignee">
-            <option value="">Selecionar...</option>
-            <option value="Bruno">Bruno</option>
-            <option value="Pietro">Pietro</option>
-            <option value="Maurício">Maurício</option>
-          </select>
+          <label>Responsáveis</label>
+          <div class="assignees-grid" id="assigneesGrid"></div>
         </div>
       </div>
       <div class="form-group">
@@ -681,13 +735,19 @@ body::before{
 </div>
 
 <script>
-const STORAGE_KEY = 'workflow_tasks_v2';
-const PEOPLE_KEY = 'workflow_people_v1';
+const STORAGE_KEY = 'workflow_tasks_v3';
+const PEOPLE_KEY = 'workflow_people_v2';
+
+const DEFAULT_PEOPLE = ['Bruno','Pietro','Maurício'];
+let people = JSON.parse(localStorage.getItem(PEOPLE_KEY) || 'null') || [...DEFAULT_PEOPLE];
 
 let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
-// Migrate old tasks without area
-tasks.forEach(t => { if (!t.area) t.area = 'venda'; });
+// Migrate: assignee string → assignees array
+tasks.forEach(t => {
+  if (!t.area) t.area = 'venda';
+  if (!t.assignees) t.assignees = t.assignee ? [t.assignee] : [];
+  delete t.assignee;
+});
 
 let currentArea = 'venda';
 let currentFilter = 'all';
@@ -696,8 +756,9 @@ let searchQuery = '';
 let editingId = null;
 let contextTaskId = null;
 let selectedModalArea = 'venda';
+let selectedModalAssignees = [];
 
-const areaLabels = { venda: 'Venda', entrega: 'Entrega', estrategia: 'Estratégia' };
+const areaLabels = { venda:'Venda', entrega:'Entrega', estrategia:'Estratégia' };
 
 function avatarClass(name) {
   if (!name) return 'av-1';
@@ -706,32 +767,32 @@ function avatarClass(name) {
   for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
   return colors[Math.abs(h) % colors.length];
 }
-function initials(name) {
+function ini(name) {
   if (!name) return '?';
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
 }
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr + 'T12:00:00');
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+function formatDate(ds) {
+  if (!ds) return '';
+  const d = new Date(ds + 'T12:00:00');
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
 }
-function dateStatus(dateStr) {
-  if (!dateStr) return '';
+function dateStatus(ds) {
+  if (!ds) return '';
   const today = new Date(); today.setHours(0,0,0,0);
-  const d = new Date(dateStr + 'T12:00:00');
+  const d = new Date(ds + 'T12:00:00');
   const diff = (d - today) / (1000*60*60*24);
   if (diff < 0) return 'overdue';
   if (diff <= 2) return 'soon';
   return '';
 }
-
 const categoryLabels = {
-  marketing:'Marketing', financeiro:'Financeiro', operacional:'Operacional',
-  vendas:'Vendas', tech:'Tech', rh:'RH'
+  marketing:'Marketing',financeiro:'Financeiro',operacional:'Operacional',
+  vendas:'Vendas',tech:'Tech',rh:'RH'
 };
 
 function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
-function genId() { return 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+function savePeople() { localStorage.setItem(PEOPLE_KEY, JSON.stringify(people)); }
+function genId() { return 't_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
 
 function getFiltered() {
   let f = tasks.filter(t => t.area === currentArea);
@@ -742,7 +803,7 @@ function getFiltered() {
     f = f.filter(t =>
       (t.title||'').toLowerCase().includes(q) ||
       (t.description||'').toLowerCase().includes(q) ||
-      (t.assignee||'').toLowerCase().includes(q)
+      (t.assignees||[]).some(a => a.toLowerCase().includes(q))
     );
   }
   return f;
@@ -752,32 +813,31 @@ function render() {
   const statuses = ['afazer','andamento','revisao','concluido'];
   const filtered = getFiltered();
   const areaTasks = tasks.filter(t => t.area === currentArea);
-
   statuses.forEach(s => {
     const list = document.querySelector(`.card-list[data-status="${s}"]`);
     const items = filtered.filter(t => t.status === s);
     list.innerHTML = items.length ? items.map(cardHTML).join('') : emptyHTML();
-    const allForStatus = areaTasks.filter(t => t.status === s).length;
-    const countEl = document.getElementById('count' + s.charAt(0).toUpperCase() + s.slice(1));
-    if (countEl) countEl.textContent = allForStatus;
+    const c = areaTasks.filter(t => t.status === s).length;
+    const el = document.getElementById('count' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (el) el.textContent = c;
   });
-
-  // stats (for current area)
   document.getElementById('statTodo').textContent = areaTasks.filter(t => t.status === 'afazer').length;
   document.getElementById('statProgress').textContent = areaTasks.filter(t => t.status === 'andamento').length;
   document.getElementById('statReview').textContent = areaTasks.filter(t => t.status === 'revisao').length;
   document.getElementById('statDone').textContent = areaTasks.filter(t => t.status === 'concluido').length;
-
-  // area tab counts (total per area)
   document.getElementById('areaCountVenda').textContent = tasks.filter(t => t.area === 'venda').length;
   document.getElementById('areaCountEntrega').textContent = tasks.filter(t => t.area === 'entrega').length;
   document.getElementById('areaCountEstrategia').textContent = tasks.filter(t => t.area === 'estrategia').length;
-
   initDragDrop();
 }
 
 function cardHTML(t) {
   const ds = dateStatus(t.dueDate);
+  const assignees = t.assignees || [];
+  const avatarsHTML = assignees.map(name =>
+    `<div class="avatar ${avatarClass(name)}" data-tooltip="${esc(name)}">${ini(name)}</div>`
+  ).join('');
+
   return `
   <div class="task-card" draggable="true" data-id="${t.id}" data-priority="${t.priority}">
     <div class="card-top">
@@ -791,7 +851,21 @@ function cardHTML(t) {
       <div class="card-footer-left">
         ${t.dueDate ? `<span class="card-date ${ds}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${formatDate(t.dueDate)}</span>` : ''}
       </div>
-      ${t.assignee ? `<div class="avatar ${avatarClass(t.assignee)}" data-tooltip="${esc(t.assignee)}">${initials(t.assignee)}</div>` : ''}
+      <div class="avatar-group" style="position:relative;">
+        <button class="add-person-btn" onclick="togglePicker(event,'${t.id}')" data-tooltip="Adicionar pessoa">+</button>
+        ${avatarsHTML}
+        <div class="person-picker" id="picker-${t.id}">
+          <div class="person-picker-title">Responsáveis</div>
+          ${people.map(name => {
+            const sel = assignees.includes(name) ? 'selected' : '';
+            return `<button class="person-picker-item ${sel}" onclick="toggleAssignee(event,'${t.id}','${esc(name)}')">
+              <div class="avatar ${avatarClass(name)}" style="width:22px;height:22px;font-size:.5rem;border:none;">${ini(name)}</div>
+              ${esc(name)}
+              <span class="check-mark">✓</span>
+            </button>`;
+          }).join('')}
+        </div>
+      </div>
     </div>
   </div>`;
 }
@@ -809,6 +883,39 @@ function esc(s) {
   return d.innerHTML;
 }
 
+// ─── PERSON PICKER (on card) ───
+function togglePicker(e, taskId) {
+  e.stopPropagation();
+  e.preventDefault();
+  // Close all other pickers
+  document.querySelectorAll('.person-picker.show').forEach(p => {
+    if (p.id !== 'picker-' + taskId) p.classList.remove('show');
+  });
+  const picker = document.getElementById('picker-' + taskId);
+  picker.classList.toggle('show');
+}
+
+function toggleAssignee(e, taskId, name) {
+  e.stopPropagation();
+  e.preventDefault();
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+  if (!task.assignees) task.assignees = [];
+  const idx = task.assignees.indexOf(name);
+  if (idx >= 0) task.assignees.splice(idx, 1);
+  else task.assignees.push(name);
+  save();
+  render();
+}
+
+// Close pickers on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.person-picker') && !e.target.closest('.add-person-btn')) {
+    document.querySelectorAll('.person-picker.show').forEach(p => p.classList.remove('show'));
+  }
+  document.getElementById('contextMenu').classList.remove('show');
+});
+
 // ─── AREA SWITCHING ───
 function switchArea(area, btn) {
   currentArea = area;
@@ -822,6 +929,24 @@ function selectArea(el) {
   document.querySelectorAll('.area-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   selectedModalArea = el.dataset.area;
+}
+
+// ─── MODAL ASSIGNEES ───
+function renderAssigneesGrid(selected) {
+  const grid = document.getElementById('assigneesGrid');
+  grid.innerHTML = people.map(name => {
+    const sel = selected.includes(name) ? 'selected' : '';
+    return `<div class="assignee-chip ${sel}" onclick="toggleModalAssignee(this,'${esc(name)}')">
+      <div class="avatar ${avatarClass(name)}">${ini(name)}</div>
+      ${esc(name)}
+    </div>`;
+  }).join('');
+}
+
+function toggleModalAssignee(el, name) {
+  const idx = selectedModalAssignees.indexOf(name);
+  if (idx >= 0) { selectedModalAssignees.splice(idx, 1); el.classList.remove('selected'); }
+  else { selectedModalAssignees.push(name); el.classList.add('selected'); }
 }
 
 // ─── DRAG & DROP ───
@@ -862,9 +987,9 @@ function openModal(status) {
   document.getElementById('taskPriority').value = 'media';
   document.getElementById('taskStatus').value = status || 'afazer';
   document.getElementById('taskDate').value = '';
-  document.getElementById('taskAssignee').value = '';
   document.getElementById('taskCategory').value = '';
-  // Set area to current area
+  selectedModalAssignees = [];
+  renderAssigneesGrid([]);
   selectedModalArea = currentArea;
   document.querySelectorAll('.area-option').forEach(o => {
     o.classList.toggle('selected', o.dataset.area === currentArea);
@@ -885,18 +1010,16 @@ function closeModalOutside(e) {
 function saveTask() {
   const title = document.getElementById('taskTitle').value.trim();
   if (!title) { document.getElementById('taskTitle').focus(); return; }
-
   const data = {
     title,
     description: document.getElementById('taskDesc').value.trim(),
     priority: document.getElementById('taskPriority').value,
     status: document.getElementById('taskStatus').value,
     dueDate: document.getElementById('taskDate').value,
-    assignee: document.getElementById('taskAssignee').value,
+    assignees: [...selectedModalAssignees],
     category: document.getElementById('taskCategory').value,
     area: selectedModalArea,
   };
-
   if (editingId) {
     const t = tasks.find(t => t.id === editingId);
     if (t) Object.assign(t, data);
@@ -905,25 +1028,12 @@ function saveTask() {
     data.createdAt = new Date().toISOString();
     tasks.push(data);
   }
-
-  if (data.assignee) {
-    const sel = document.getElementById('taskAssignee');
-    const exists = [...sel.options].some(o => o.value === data.assignee);
-    if (!exists) {
-      const opt = document.createElement('option');
-      opt.value = data.assignee; opt.textContent = data.assignee;
-      sel.appendChild(opt); savePeople();
-    }
-  }
-
-  // Switch to the task's area if different
   if (data.area !== currentArea) {
     currentArea = data.area;
     document.querySelectorAll('.area-tab').forEach(t => {
       t.classList.toggle('active', t.dataset.area === currentArea);
     });
   }
-
   save(); closeModal(); render();
 }
 
@@ -936,9 +1046,6 @@ function showContextMenu(e, id) {
   menu.style.left = e.clientX + 'px';
   menu.classList.add('show');
 }
-document.addEventListener('click', () => {
-  document.getElementById('contextMenu').classList.remove('show');
-});
 
 function editTask() {
   const t = tasks.find(t => t.id === contextTaskId);
@@ -950,8 +1057,9 @@ function editTask() {
   document.getElementById('taskPriority').value = t.priority;
   document.getElementById('taskStatus').value = t.status;
   document.getElementById('taskDate').value = t.dueDate || '';
-  document.getElementById('taskAssignee').value = t.assignee || '';
   document.getElementById('taskCategory').value = t.category || '';
+  selectedModalAssignees = [...(t.assignees || [])];
+  renderAssigneesGrid(selectedModalAssignees);
   selectedModalArea = t.area || 'venda';
   document.querySelectorAll('.area-option').forEach(o => {
     o.classList.toggle('selected', o.dataset.area === selectedModalArea);
@@ -963,7 +1071,7 @@ function editTask() {
 function duplicateTask() {
   const t = tasks.find(t => t.id === contextTaskId);
   if (!t) return;
-  tasks.push({ ...t, id: genId(), title: t.title + ' (cópia)', createdAt: new Date().toISOString() });
+  tasks.push({ ...t, id: genId(), assignees:[...(t.assignees||[])], title: t.title + ' (cópia)', createdAt: new Date().toISOString() });
   save(); render();
 }
 
@@ -994,27 +1102,12 @@ document.getElementById('searchInput').addEventListener('input', e => {
   searchQuery = e.target.value; render();
 });
 
-// ─── PEOPLE PERSISTENCE ───
-function loadPeople() {
-  const people = JSON.parse(localStorage.getItem(PEOPLE_KEY) || '[]');
-  const sel = document.getElementById('taskAssignee');
-  people.forEach(name => {
-    if (![...sel.options].some(o => o.value === name)) {
-      const opt = document.createElement('option');
-      opt.value = name; opt.textContent = name;
-      sel.appendChild(opt);
-    }
-  });
-}
-function savePeople() {
-  const sel = document.getElementById('taskAssignee');
-  const people = [...sel.options].map(o => o.value).filter(v => v);
-  localStorage.setItem(PEOPLE_KEY, JSON.stringify(people));
-}
-
 // ─── KEYBOARD ───
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') {
+    closeModal();
+    document.querySelectorAll('.person-picker.show').forEach(p => p.classList.remove('show'));
+  }
   if (e.key === 'n' && !e.ctrlKey && !e.metaKey &&
       !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
     openModal();
@@ -1023,65 +1116,52 @@ document.addEventListener('keydown', e => {
 
 // ─── SEED TASKS ───
 function seedTasks() {
-  if (localStorage.getItem('workflow_seeded_v3')) return;
+  if (localStorage.getItem('workflow_seeded_v4')) return;
   const seed = [
-    // ══════════ ESTRATÉGIA ══════════
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir oferta irresistível e preço',description:'Estruturar a oferta principal, bônus, ancoragem de preço e garantia. Definir ticket e condições de pagamento.',category:'vendas',assignee:'Bruno',dueDate:'2026-04-15'},
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Mapear público-alvo e avatar',description:'Definir persona principal, dores, desejos, objeções e nível de consciência do lead.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-15'},
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir orçamento e meta de ads',description:'Calcular CPA desejado, budget diário, meta de leads e vendas para o período de teste e escala.',category:'financeiro',assignee:'Bruno',dueDate:'2026-04-16'},
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Criar cronograma completo do lançamento',description:'Definir datas de cada etapa: produção, teste de ads, otimização, escala e encerramento.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-16'},
-    {area:'estrategia',status:'afazer',priority:'media',title:'Análise de concorrência e benchmark',description:'Pesquisar concorrentes diretos, analisar suas páginas, VSLs, ofertas e posicionamento.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-17'},
-    {area:'estrategia',status:'afazer',priority:'media',title:'Definir esteira de produtos e upsell',description:'Mapear order bump, upsell e downsell para maximizar o ticket médio do funil.',category:'vendas',assignee:'Bruno',dueDate:'2026-04-18'},
-    {area:'estrategia',status:'afazer',priority:'media',title:'Planejar estratégia de escala de ads',description:'Definir critérios de validação de criativos, regras de escala vertical e horizontal, e KPIs de corte.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-20'},
-    {area:'estrategia',status:'afazer',priority:'baixa',title:'Definir estratégia de retargeting',description:'Estruturar públicos de retargeting por etapa do funil: visitou página, iniciou checkout, abandonou.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-22'},
-
-    // ══════════ VENDA ══════════
-    // --- Página de vendas ---
-    {area:'venda',status:'afazer',priority:'alta',title:'Revisar página de vendas atual',description:'Analisar estrutura, headlines, CTAs, prova social e pontos de melhoria da página atual.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-16'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Revisar copy da VSL',description:'Revisar roteiro completo: gancho, história, mecanismo único, oferta, ancoragem, urgência e CTA.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-17'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Produzir VSL',description:'Gravar a VSL com base no roteiro aprovado. Garantir boa iluminação, áudio e enquadramento.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-19'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Editar VSL',description:'Edição profissional com cortes dinâmicos, legendas, gráficos, B-roll e motion graphics.',category:'tech',assignee:'Maurício',dueDate:'2026-04-21'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Criar página de vendas com VSL',description:'Montar nova página de vendas integrando a VSL editada, copy otimizada, depoimentos e checkout.',category:'tech',assignee:'Maurício',dueDate:'2026-04-23'},
-
-    // --- Ads ---
-    {area:'venda',status:'afazer',priority:'alta',title:'Escrever copy dos ads',description:'Criar variações de copy para Facebook/Instagram Ads: ganchos diferentes, ângulos de dor e desejo.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-18'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Produzir criativos dos ads',description:'Gravar/criar os criativos de vídeo e imagem para os anúncios. Mínimo 5 variações de gancho.',category:'marketing',assignee:'Maurício',dueDate:'2026-04-20'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Editar criativos dos ads',description:'Editar os vídeos dos ads com legendas, cortes rápidos e formato adequado para cada placement.',category:'tech',assignee:'Maurício',dueDate:'2026-04-22'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Subir teste de ads',description:'Configurar campanhas de teste no Facebook Ads: estrutura ABO, públicos, placements e budget de teste.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-24'},
-    {area:'venda',status:'afazer',priority:'media',title:'Analisar resultados dos testes de ads',description:'Avaliar CTR, CPC, CPL, taxa de conversão e ROAS dos primeiros testes para identificar winners.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-27'},
-    {area:'venda',status:'afazer',priority:'media',title:'Otimizar e escalar ads vencedores',description:'Escalar os criativos e públicos vencedores. Aplicar duplicação, aumento de budget progressivo.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-29'},
-
-    // --- Funil e automação ---
-    {area:'venda',status:'afazer',priority:'alta',title:'Configurar pixel e tracking',description:'Instalar/revisar pixel do Facebook, API de conversões, UTMs e eventos de conversão no checkout.',category:'tech',assignee:'Pietro',dueDate:'2026-04-17'},
-    {area:'venda',status:'afazer',priority:'media',title:'Criar sequência de emails de vendas',description:'Escrever fluxo de emails: boas-vindas, conteúdo, abertura de carrinho, objeções e urgência.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-20'},
-    {area:'venda',status:'afazer',priority:'media',title:'Configurar checkout e pagamento',description:'Revisar página de checkout, configurar formas de pagamento, order bump e pixel de compra.',category:'tech',assignee:'Pietro',dueDate:'2026-04-18'},
-    {area:'venda',status:'afazer',priority:'media',title:'Criar página de captura',description:'Desenvolver landing page de captura de leads com headline forte, benefícios e formulário.',category:'tech',assignee:'Maurício',dueDate:'2026-04-19'},
-    {area:'venda',status:'afazer',priority:'baixa',title:'Configurar automações de WhatsApp',description:'Criar fluxo de mensagens automáticas pós-lead e pós-compra via WhatsApp.',category:'tech',assignee:'Pietro',dueDate:'2026-04-25'},
-
-    // ══════════ ENTREGA ══════════
-    {area:'entrega',status:'afazer',priority:'alta',title:'Estruturar conteúdo dos módulos',description:'Definir grade curricular, módulos, aulas e entregáveis de cada etapa da mentoria/curso.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-18'},
-    {area:'entrega',status:'afazer',priority:'alta',title:'Gravar aulas e conteúdo',description:'Produzir as videoaulas dos módulos com roteiro, slides e demonstrações práticas.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-25'},
-    {area:'entrega',status:'afazer',priority:'alta',title:'Editar aulas gravadas',description:'Edição das aulas: cortes, inserção de slides, legendas e identidade visual.',category:'tech',assignee:'Maurício',dueDate:'2026-04-28'},
-    {area:'entrega',status:'afazer',priority:'alta',title:'Configurar área de membros',description:'Setup da plataforma de entrega: criar módulos, fazer upload das aulas, configurar liberação.',category:'tech',assignee:'Pietro',dueDate:'2026-04-29'},
-    {area:'entrega',status:'afazer',priority:'media',title:'Criar materiais de apoio',description:'Desenvolver PDFs, checklists, templates e planilhas complementares às aulas.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-27'},
-    {area:'entrega',status:'afazer',priority:'media',title:'Configurar grupo de alunos',description:'Criar e configurar grupo exclusivo (Telegram/WhatsApp) com regras, boas-vindas e organização.',category:'operacional',assignee:'Pietro',dueDate:'2026-04-28'},
-    {area:'entrega',status:'afazer',priority:'media',title:'Criar fluxo de onboarding do aluno',description:'Montar sequência de boas-vindas: email, acesso à plataforma, grupo e primeiros passos.',category:'operacional',assignee:'Pietro',dueDate:'2026-04-29'},
-    {area:'entrega',status:'afazer',priority:'baixa',title:'Preparar suporte e FAQ',description:'Documentar perguntas frequentes, criar respostas padrão e definir processo de atendimento.',category:'operacional',assignee:'Maurício',dueDate:'2026-04-30'},
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir oferta irresistível e preço',description:'Estruturar a oferta principal, bônus, ancoragem de preço e garantia. Definir ticket e condições de pagamento.',category:'vendas',assignees:['Bruno'],dueDate:'2026-04-15'},
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Mapear público-alvo e avatar',description:'Definir persona principal, dores, desejos, objeções e nível de consciência do lead.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-15'},
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir orçamento e meta de ads',description:'Calcular CPA desejado, budget diário, meta de leads e vendas para o período de teste e escala.',category:'financeiro',assignees:['Bruno','Pietro'],dueDate:'2026-04-16'},
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Criar cronograma completo do lançamento',description:'Definir datas de cada etapa: produção, teste de ads, otimização, escala e encerramento.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-16'},
+    {area:'estrategia',status:'afazer',priority:'media',title:'Análise de concorrência e benchmark',description:'Pesquisar concorrentes diretos, analisar suas páginas, VSLs, ofertas e posicionamento.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-17'},
+    {area:'estrategia',status:'afazer',priority:'media',title:'Definir esteira de produtos e upsell',description:'Mapear order bump, upsell e downsell para maximizar o ticket médio do funil.',category:'vendas',assignees:['Bruno'],dueDate:'2026-04-18'},
+    {area:'estrategia',status:'afazer',priority:'media',title:'Planejar estratégia de escala de ads',description:'Definir critérios de validação de criativos, regras de escala vertical e horizontal, e KPIs de corte.',category:'marketing',assignees:['Bruno','Pietro'],dueDate:'2026-04-20'},
+    {area:'estrategia',status:'afazer',priority:'baixa',title:'Definir estratégia de retargeting',description:'Estruturar públicos de retargeting por etapa do funil: visitou página, iniciou checkout, abandonou.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-22'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Revisar página de vendas atual',description:'Analisar estrutura, headlines, CTAs, prova social e pontos de melhoria da página atual.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-16'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Revisar copy da VSL',description:'Revisar roteiro completo: gancho, história, mecanismo único, oferta, ancoragem, urgência e CTA.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-17'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Produzir VSL',description:'Gravar a VSL com base no roteiro aprovado. Garantir boa iluminação, áudio e enquadramento.',category:'marketing',assignees:['Bruno','Maurício'],dueDate:'2026-04-19'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Editar VSL',description:'Edição profissional com cortes dinâmicos, legendas, gráficos, B-roll e motion graphics.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-21'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Criar página de vendas com VSL',description:'Montar nova página de vendas integrando a VSL editada, copy otimizada, depoimentos e checkout.',category:'tech',assignees:['Maurício','Pietro'],dueDate:'2026-04-23'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Escrever copy dos ads',description:'Criar variações de copy para Facebook/Instagram Ads: ganchos diferentes, ângulos de dor e desejo.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-18'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Produzir criativos dos ads',description:'Gravar/criar os criativos de vídeo e imagem para os anúncios. Mínimo 5 variações de gancho.',category:'marketing',assignees:['Bruno','Maurício'],dueDate:'2026-04-20'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Editar criativos dos ads',description:'Editar os vídeos dos ads com legendas, cortes rápidos e formato adequado para cada placement.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-22'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Subir teste de ads',description:'Configurar campanhas de teste no Facebook Ads: estrutura ABO, públicos, placements e budget de teste.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-24'},
+    {area:'venda',status:'afazer',priority:'media',title:'Analisar resultados dos testes de ads',description:'Avaliar CTR, CPC, CPL, taxa de conversão e ROAS dos primeiros testes para identificar winners.',category:'marketing',assignees:['Pietro','Bruno'],dueDate:'2026-04-27'},
+    {area:'venda',status:'afazer',priority:'media',title:'Otimizar e escalar ads vencedores',description:'Escalar os criativos e públicos vencedores. Aplicar duplicação, aumento de budget progressivo.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-29'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Configurar pixel e tracking',description:'Instalar/revisar pixel do Facebook, API de conversões, UTMs e eventos de conversão no checkout.',category:'tech',assignees:['Pietro'],dueDate:'2026-04-17'},
+    {area:'venda',status:'afazer',priority:'media',title:'Criar sequência de emails de vendas',description:'Escrever fluxo de emails: boas-vindas, conteúdo, abertura de carrinho, objeções e urgência.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-20'},
+    {area:'venda',status:'afazer',priority:'media',title:'Configurar checkout e pagamento',description:'Revisar página de checkout, configurar formas de pagamento, order bump e pixel de compra.',category:'tech',assignees:['Pietro'],dueDate:'2026-04-18'},
+    {area:'venda',status:'afazer',priority:'media',title:'Criar página de captura',description:'Desenvolver landing page de captura de leads com headline forte, benefícios e formulário.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-19'},
+    {area:'venda',status:'afazer',priority:'baixa',title:'Configurar automações de WhatsApp',description:'Criar fluxo de mensagens automáticas pós-lead e pós-compra via WhatsApp.',category:'tech',assignees:['Pietro'],dueDate:'2026-04-25'},
+    {area:'entrega',status:'afazer',priority:'alta',title:'Estruturar conteúdo dos módulos',description:'Definir grade curricular, módulos, aulas e entregáveis de cada etapa da mentoria/curso.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-18'},
+    {area:'entrega',status:'afazer',priority:'alta',title:'Gravar aulas e conteúdo',description:'Produzir as videoaulas dos módulos com roteiro, slides e demonstrações práticas.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-25'},
+    {area:'entrega',status:'afazer',priority:'alta',title:'Editar aulas gravadas',description:'Edição das aulas: cortes, inserção de slides, legendas e identidade visual.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-28'},
+    {area:'entrega',status:'afazer',priority:'alta',title:'Configurar área de membros',description:'Setup da plataforma de entrega: criar módulos, fazer upload das aulas, configurar liberação.',category:'tech',assignees:['Pietro','Maurício'],dueDate:'2026-04-29'},
+    {area:'entrega',status:'afazer',priority:'media',title:'Criar materiais de apoio',description:'Desenvolver PDFs, checklists, templates e planilhas complementares às aulas.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-27'},
+    {area:'entrega',status:'afazer',priority:'media',title:'Configurar grupo de alunos',description:'Criar e configurar grupo exclusivo (Telegram/WhatsApp) com regras, boas-vindas e organização.',category:'operacional',assignees:['Pietro'],dueDate:'2026-04-28'},
+    {area:'entrega',status:'afazer',priority:'media',title:'Criar fluxo de onboarding do aluno',description:'Montar sequência de boas-vindas: email, acesso à plataforma, grupo e primeiros passos.',category:'operacional',assignees:['Pietro','Bruno'],dueDate:'2026-04-29'},
+    {area:'entrega',status:'afazer',priority:'baixa',title:'Preparar suporte e FAQ',description:'Documentar perguntas frequentes, criar respostas padrão e definir processo de atendimento.',category:'operacional',assignees:['Maurício'],dueDate:'2026-04-30'},
   ];
-
   seed.forEach((t,i) => {
     t.id = 't_seed_' + i + '_' + Math.random().toString(36).slice(2,7);
     t.createdAt = new Date().toISOString();
   });
-
   tasks = seed;
   save();
-  localStorage.setItem('workflow_seeded_v3','1');
+  localStorage.setItem('workflow_seeded_v4','1');
 }
 
 // ─── INIT ───
 seedTasks();
-loadPeople();
 render();
 </script>
 </body>
