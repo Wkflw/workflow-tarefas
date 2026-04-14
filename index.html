@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflow - Tarefas da Empresa</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg-deep:#060a14;
+  --bg-primary:#0c1121;
+  --bg-secondary:#111a2e;
+  --bg-card:#141d33;
+  --bg-card-hover:#182340;
+  --bg-elevated:#1a2540;
+  --border:#1e2d4a;
+  --border-light:#253554;
+  --text-primary:#e8ecf4;
+  --text-secondary:#8896b3;
+  --text-muted:#5a6a8a;
+  --accent:#e8a427;
+  --accent-glow:#e8a42740;
+  --accent-hover:#f0b842;
+  --teal:#22c9a8;
+  --teal-bg:#22c9a815;
+  --red:#ef5466;
+  --red-bg:#ef546615;
+  --amber:#e8a427;
+  --amber-bg:#e8a42715;
+  --green:#3dd68c;
+  --green-bg:#3dd68c15;
+  --blue:#4d8ef7;
+  --blue-bg:#4d8ef715;
+  --purple:#9b72f2;
+  --purple-bg:#9b72f215;
+  --column-afazer:#4d8ef7;
+  --column-andamento:#e8a427;
+  --column-revisao:#9b72f2;
+  --column-concluido:#3dd68c;
+  --area-venda:#e8a427;
+  --area-entrega:#4d8ef7;
+  --area-estrategia:#9b72f2;
+  --radius:10px;
+  --radius-lg:14px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.5);
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg-deep);
+  color:var(--text-primary);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%,#4d8ef710 0%,transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 10%,#9b72f208 0%,transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%,#e8a42706 0%,transparent 50%);
+  pointer-events:none;z-index:0;
+}
+
+/* ─── HEADER ─── */
+.header{
+  position:sticky;top:0;z-index:100;
+  background:var(--bg-primary);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  padding:0 2rem;
+  height:68px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.header-left{display:flex;align-items:center;gap:1rem;}
+.logo-mark{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--accent),#d4911e);
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;font-weight:800;font-size:1.15rem;
+  color:var(--bg-deep);
+  box-shadow:0 2px 12px var(--accent-glow);
+  position:relative;overflow:hidden;
+}
+.logo-mark::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.2) 50%,transparent 60%);
+}
+.header-title{
+  font-family:'Outfit',sans-serif;
+  font-weight:700;font-size:1.25rem;
+  letter-spacing:-.02em;
+}
+.header-title span{color:var(--text-muted);font-weight:400;margin-left:.35rem;}
+.header-right{display:flex;align-items:center;gap:.75rem;}
+
+/* ─── SEARCH ─── */
+.search-box{position:relative;width:260px;}
+.search-box input{
+  width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;
+  padding:.55rem 1rem .55rem 2.4rem;color:var(--text-primary);
+  font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none;transition:var(--transition);
+}
+.search-box input::placeholder{color:var(--text-muted)}
+.search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);}
+.search-box svg{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted);pointer-events:none;}
+
+/* ─── AREA TABS ─── */
+.area-tabs{
+  display:flex;align-items:stretch;
+  background:var(--bg-primary);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;
+  gap:0;
+  position:relative;z-index:90;
+}
+.area-tab{
+  position:relative;
+  padding:.85rem 1.5rem;
+  font-family:'Outfit',sans-serif;
+  font-size:.9rem;font-weight:600;
+  color:var(--text-muted);
+  background:none;border:none;
+  cursor:pointer;
+  transition:var(--transition);
+  display:flex;align-items:center;gap:.6rem;
+  border-bottom:3px solid transparent;
+  margin-bottom:-1px;
+}
+.area-tab:hover{color:var(--text-secondary);}
+.area-tab.active{color:var(--text-primary);border-bottom-color:var(--accent);}
+.area-tab[data-area="venda"].active{border-bottom-color:var(--area-venda);}
+.area-tab[data-area="entrega"].active{border-bottom-color:var(--area-entrega);}
+.area-tab[data-area="estrategia"].active{border-bottom-color:var(--area-estrategia);}
+.area-tab-icon{
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;
+  transition:var(--transition);
+}
+.area-tab[data-area="venda"] .area-tab-icon{background:var(--amber-bg);color:var(--amber);}
+.area-tab[data-area="entrega"] .area-tab-icon{background:var(--blue-bg);color:var(--blue);}
+.area-tab[data-area="estrategia"] .area-tab-icon{background:var(--purple-bg);color:var(--purple);}
+.area-tab-count{
+  background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;
+  padding:.1rem .45rem;font-size:.65rem;font-weight:600;color:var(--text-muted);
+  min-width:22px;text-align:center;
+}
+.area-tab.active .area-tab-count{
+  background:var(--bg-secondary);color:var(--text-secondary);
+}
+
+/* ─── FILTER CHIPS ─── */
+.filter-bar{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.75rem 2rem;
+  border-bottom:1px solid var(--border);
+  background:var(--bg-primary);
+  overflow-x:auto;position:relative;z-index:50;
+}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-label{
+  font-family:'Outfit',sans-serif;font-size:.75rem;font-weight:600;
+  color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;
+  margin-right:.25rem;white-space:nowrap;
+}
+.chip{
+  padding:.3rem .75rem;border-radius:6px;font-size:.8rem;font-weight:500;
+  background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);
+  cursor:pointer;transition:var(--transition);white-space:nowrap;user-select:none;
+}
+.chip:hover{border-color:var(--border-light);color:var(--text-primary);}
+.chip.active{background:var(--accent);border-color:var(--accent);color:var(--bg-deep);font-weight:600;}
+
+/* ─── BTN ─── */
+.btn-primary{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.55rem 1.15rem;
+  background:linear-gradient(135deg,var(--accent),#d4911e);
+  color:var(--bg-deep);border:none;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-weight:600;font-size:.875rem;
+  cursor:pointer;transition:var(--transition);
+  box-shadow:0 2px 10px var(--accent-glow);white-space:nowrap;
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--accent-glow);background:linear-gradient(135deg,var(--accent-hover),#dfa12a);}
+.btn-primary:active{transform:translateY(0);}
+.btn-primary svg{width:16px;height:16px;}
+
+/* ─── STATS ─── */
+.stats-row{
+  display:flex;gap:.75rem;padding:1.25rem 2rem;position:relative;z-index:1;
+}
+.stat-card{
+  flex:1;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1rem 1.15rem;display:flex;align-items:center;gap:.85rem;transition:var(--transition);
+}
+.stat-card:hover{border-color:var(--border-light);transform:translateY(-1px);}
+.stat-icon{
+  width:38px;height:38px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;
+}
+.stat-icon.blue{background:var(--blue-bg);color:var(--blue);}
+.stat-icon.amber{background:var(--amber-bg);color:var(--amber);}
+.stat-icon.purple{background:var(--purple-bg);color:var(--purple);}
+.stat-icon.green{background:var(--green-bg);color:var(--green);}
+.stat-info h4{font-family:'Outfit',sans-serif;font-size:1.35rem;font-weight:700;line-height:1;}
+.stat-info p{font-size:.75rem;color:var(--text-muted);margin-top:.2rem;}
+
+/* ─── BOARD ─── */
+.board{
+  display:flex;gap:1rem;padding:0 2rem 2rem;
+  min-height:calc(100vh - 310px);position:relative;z-index:1;overflow-x:auto;
+}
+.board::-webkit-scrollbar{height:6px}
+.board::-webkit-scrollbar-track{background:transparent}
+.board::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.column{flex:1;min-width:280px;max-width:340px;display:flex;flex-direction:column;}
+.column-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.85rem 0;margin-bottom:.5rem;position:sticky;top:68px;z-index:10;
+}
+.column-title-group{display:flex;align-items:center;gap:.6rem;}
+.column-dot{width:10px;height:10px;border-radius:50%;}
+.column-title{
+  font-family:'Outfit',sans-serif;font-size:.85rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.column-count{
+  background:var(--bg-elevated);border:1px solid var(--border);border-radius:5px;
+  padding:.1rem .45rem;font-size:.7rem;font-weight:600;color:var(--text-muted);
+}
+.column-add-btn{
+  width:28px;height:28px;border-radius:6px;background:transparent;
+  border:1px solid transparent;color:var(--text-muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:1.1rem;
+}
+.column-add-btn:hover{background:var(--bg-elevated);border-color:var(--border);color:var(--text-primary);}
+
+.card-list{
+  flex:1;display:flex;flex-direction:column;gap:.6rem;
+  min-height:80px;padding:.35rem;border-radius:var(--radius);transition:background .2s;
+}
+.card-list.drag-over{
+  background:var(--bg-secondary);outline:2px dashed var(--border-light);
+  outline-offset:-2px;border-radius:var(--radius);
+}
+
+/* ─── CARDS ─── */
+.task-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:.85rem;cursor:grab;transition:var(--transition);position:relative;overflow:hidden;
+}
+.task-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;
+}
+.task-card[data-priority="alta"]::before{background:var(--red);}
+.task-card[data-priority="media"]::before{background:var(--amber);}
+.task-card[data-priority="baixa"]::before{background:var(--teal);}
+.task-card:hover{border-color:var(--border-light);transform:translateY(-2px);box-shadow:var(--shadow);}
+.task-card.dragging{opacity:.5;transform:rotate(2deg) scale(.97);}
+.task-card .card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;}
+.priority-badge{
+  padding:.15rem .5rem;border-radius:4px;font-size:.65rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.priority-badge.alta{background:var(--red-bg);color:var(--red);}
+.priority-badge.media{background:var(--amber-bg);color:var(--amber);}
+.priority-badge.baixa{background:var(--teal-bg);color:var(--teal);}
+.card-menu-btn{
+  width:24px;height:24px;border-radius:5px;background:transparent;border:none;
+  color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:1rem;transition:var(--transition);opacity:0;
+}
+.task-card:hover .card-menu-btn{opacity:1;}
+.card-menu-btn:hover{background:var(--bg-elevated);color:var(--text-primary);}
+.card-title{
+  font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;
+  line-height:1.35;margin-bottom:.45rem;color:var(--text-primary);
+}
+.card-desc{
+  font-size:.78rem;color:var(--text-muted);line-height:1.5;margin-bottom:.65rem;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.card-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.6rem;}
+.tag{
+  padding:.15rem .5rem;border-radius:4px;font-size:.68rem;font-weight:500;
+  background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);
+}
+.tag.marketing{background:var(--purple-bg);color:var(--purple);border-color:transparent;}
+.tag.financeiro{background:var(--green-bg);color:var(--green);border-color:transparent;}
+.tag.operacional{background:var(--blue-bg);color:var(--blue);border-color:transparent;}
+.tag.vendas{background:var(--amber-bg);color:var(--amber);border-color:transparent;}
+.tag.tech{background:var(--teal-bg);color:var(--teal);border-color:transparent;}
+.tag.rh{background:var(--red-bg);color:var(--red);border-color:transparent;}
+
+.card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-top:.55rem;border-top:1px solid var(--border);
+}
+.card-footer-left{display:flex;align-items:center;gap:.55rem;}
+.card-date{display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--text-muted);}
+.card-date svg{width:13px;height:13px;}
+.card-date.overdue{color:var(--red);}
+.card-date.soon{color:var(--amber);}
+.avatar{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;font-weight:700;color:var(--bg-deep);flex-shrink:0;
+}
+.avatar.av-1{background:linear-gradient(135deg,#4d8ef7,#2563eb)}
+.avatar.av-2{background:linear-gradient(135deg,#e8a427,#d4911e)}
+.avatar.av-3{background:linear-gradient(135deg,#3dd68c,#22a06b)}
+.avatar.av-4{background:linear-gradient(135deg,#9b72f2,#7c53d6)}
+.avatar.av-5{background:linear-gradient(135deg,#ef5466,#d63a4c)}
+.avatar.av-6{background:linear-gradient(135deg,#22c9a8,#14967e)}
+
+/* ─── CONTEXT MENU ─── */
+.context-menu{
+  position:fixed;background:var(--bg-elevated);border:1px solid var(--border-light);
+  border-radius:var(--radius);padding:.35rem;min-width:160px;z-index:9999;
+  box-shadow:var(--shadow-lg);display:none;
+}
+.context-menu.show{display:block;}
+.context-menu button{
+  width:100%;padding:.5rem .75rem;background:none;border:none;
+  color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:.82rem;
+  text-align:left;border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;gap:.5rem;transition:var(--transition);
+}
+.context-menu button:hover{background:var(--bg-secondary);color:var(--text-primary);}
+.context-menu button.danger:hover{background:var(--red-bg);color:var(--red);}
+.context-menu .sep{height:1px;background:var(--border);margin:.3rem .5rem;}
+
+/* ─── MODAL ─── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(4,6,14,.8);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  z-index:1000;display:none;align-items:center;justify-content:center;
+  padding:1rem;animation:fadeIn .2s ease;
+}
+.modal-overlay.show{display:flex;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.modal{
+  background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);
+  width:100%;max-width:520px;box-shadow:var(--shadow-lg);animation:slideUp .25s ease;
+  max-height:90vh;overflow-y:auto;
+}
+.modal::-webkit-scrollbar{width:5px}
+.modal::-webkit-scrollbar-track{background:transparent}
+.modal::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.modal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);
+}
+.modal-header h2{font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:700;}
+.modal-close{
+  width:32px;height:32px;border-radius:8px;background:transparent;
+  border:1px solid transparent;color:var(--text-muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  transition:var(--transition);
+}
+.modal-close:hover{background:var(--bg-secondary);border-color:var(--border);color:var(--text-primary);}
+
+.modal-body{padding:1.5rem;}
+.form-group{margin-bottom:1.1rem;}
+.form-group label{
+  display:block;font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;
+  color:var(--text-secondary);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em;
+}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;
+  padding:.6rem .85rem;color:var(--text-primary);font-family:'DM Sans',sans-serif;
+  font-size:.875rem;outline:none;transition:var(--transition);
+}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);
+}
+.form-group textarea{resize:vertical;min-height:80px;}
+.form-group select{
+  cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6a8a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right .75rem center;padding-right:2rem;
+}
+.form-group select option{background:var(--bg-secondary);color:var(--text-primary);}
+.form-row{display:flex;gap:.85rem;}
+.form-row .form-group{flex:1;}
+
+/* Area selector in modal */
+.area-selector{display:flex;gap:.5rem;margin-bottom:1.1rem;}
+.area-option{
+  flex:1;padding:.65rem .5rem;border-radius:8px;
+  background:var(--bg-secondary);border:2px solid var(--border);
+  cursor:pointer;transition:var(--transition);
+  display:flex;flex-direction:column;align-items:center;gap:.35rem;
+  font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:600;
+  color:var(--text-muted);
+}
+.area-option:hover{border-color:var(--border-light);color:var(--text-secondary);}
+.area-option.selected{color:var(--text-primary);}
+.area-option[data-area="venda"].selected{border-color:var(--area-venda);background:rgba(232,164,39,.08);}
+.area-option[data-area="entrega"].selected{border-color:var(--area-entrega);background:rgba(77,142,247,.08);}
+.area-option[data-area="estrategia"].selected{border-color:var(--area-estrategia);background:rgba(155,114,242,.08);}
+.area-option-icon{font-size:1.2rem;}
+
+.modal-footer{
+  display:flex;align-items:center;justify-content:flex-end;gap:.65rem;
+  padding:1rem 1.5rem;border-top:1px solid var(--border);
+}
+.btn-cancel{
+  padding:.55rem 1.15rem;background:transparent;border:1px solid var(--border);
+  border-radius:8px;color:var(--text-secondary);font-family:'DM Sans',sans-serif;
+  font-weight:500;font-size:.875rem;cursor:pointer;transition:var(--transition);
+}
+.btn-cancel:hover{border-color:var(--border-light);color:var(--text-primary);}
+
+/* ─── EMPTY STATE ─── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem 1rem;color:var(--text-muted);font-size:.82rem;text-align:center;gap:.35rem;
+}
+.empty-state svg{width:32px;height:32px;opacity:.4;margin-bottom:.25rem;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .stats-row{flex-wrap:wrap;}
+  .stat-card{min-width:calc(50% - .5rem);}
+  .board{padding:0 1rem 1rem;}
+  .column{min-width:260px;}
+  .header{padding:0 1rem;}
+  .filter-bar{padding:.75rem 1rem;}
+  .area-tabs{padding:0 1rem;}
+}
+@media(max-width:600px){
+  .search-box{width:180px;}
+  .stat-card{min-width:100%;}
+  .header-title span{display:none;}
+  .stats-row{padding:1rem;}
+  .form-row{flex-direction:column;gap:0;}
+  .area-tab{padding:.75rem .85rem;font-size:.82rem;}
+  .area-tab span.tab-label{display:none;}
+}
+
+/* ─── ANIMATIONS ─── */
+.task-card{animation:cardIn .35s ease both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Tooltip */
+[data-tooltip]{position:relative;}
+[data-tooltip]:hover::after{
+  content:attr(data-tooltip);
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--text-primary);
+  padding:.3rem .6rem;border-radius:6px;font-size:.7rem;white-space:nowrap;
+  box-shadow:var(--shadow);z-index:999;animation:fadeIn .15s ease;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">W</div>
+    <h1 class="header-title">Workflow<span>Tarefas da Empresa</span></h1>
+  </div>
+  <div class="header-right">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Buscar tarefas...">
+    </div>
+    <button class="btn-primary" onclick="openModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      Nova Tarefa
+    </button>
+  </div>
+</header>
+
+<!-- AREA TABS -->
+<nav class="area-tabs">
+  <button class="area-tab active" data-area="venda" onclick="switchArea('venda',this)">
+    <div class="area-tab-icon">💰</div>
+    <span class="tab-label">Venda</span>
+    <span class="area-tab-count" id="areaCountVenda">0</span>
+  </button>
+  <button class="area-tab" data-area="entrega" onclick="switchArea('entrega',this)">
+    <div class="area-tab-icon">📦</div>
+    <span class="tab-label">Entrega</span>
+    <span class="area-tab-count" id="areaCountEntrega">0</span>
+  </button>
+  <button class="area-tab" data-area="estrategia" onclick="switchArea('estrategia',this)">
+    <div class="area-tab-icon">🎯</div>
+    <span class="tab-label">Estratégia</span>
+    <span class="area-tab-count" id="areaCountEstrategia">0</span>
+  </button>
+</nav>
+
+<!-- FILTERS -->
+<div class="filter-bar">
+  <span class="filter-label">Prioridade</span>
+  <button class="chip active" data-filter="all" onclick="setFilter('all',this)">Todas</button>
+  <button class="chip" data-filter="alta" onclick="setFilter('alta',this)">Alta</button>
+  <button class="chip" data-filter="media" onclick="setFilter('media',this)">Média</button>
+  <button class="chip" data-filter="baixa" onclick="setFilter('baixa',this)">Baixa</button>
+  <span class="filter-label" style="margin-left:.75rem">Categoria</span>
+  <button class="chip" data-cat="marketing" onclick="setCatFilter('marketing',this)">Marketing</button>
+  <button class="chip" data-cat="financeiro" onclick="setCatFilter('financeiro',this)">Financeiro</button>
+  <button class="chip" data-cat="operacional" onclick="setCatFilter('operacional',this)">Operacional</button>
+  <button class="chip" data-cat="vendas" onclick="setCatFilter('vendas',this)">Vendas</button>
+  <button class="chip" data-cat="tech" onclick="setCatFilter('tech',this)">Tech</button>
+  <button class="chip" data-cat="rh" onclick="setCatFilter('rh',this)">RH</button>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-icon blue">📋</div><div class="stat-info"><h4 id="statTodo">0</h4><p>A Fazer</p></div></div>
+  <div class="stat-card"><div class="stat-icon amber">⚡</div><div class="stat-info"><h4 id="statProgress">0</h4><p>Em Andamento</p></div></div>
+  <div class="stat-card"><div class="stat-icon purple">🔍</div><div class="stat-info"><h4 id="statReview">0</h4><p>Em Revisão</p></div></div>
+  <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><h4 id="statDone">0</h4><p>Concluído</p></div></div>
+</div>
+
+<!-- BOARD -->
+<div class="board" id="board">
+  <div class="column" data-status="afazer">
+    <div class="column-header">
+      <div class="column-title-group">
+        <div class="column-dot" style="background:var(--column-afazer)"></div>
+        <span class="column-title">A Fazer</span>
+        <span class="column-count" id="countAfazer">0</span>
+      </div>
+      <button class="column-add-btn" onclick="openModal('afazer')" data-tooltip="Adicionar tarefa">+</button>
+    </div>
+    <div class="card-list" data-status="afazer"></div>
+  </div>
+  <div class="column" data-status="andamento">
+    <div class="column-header">
+      <div class="column-title-group">
+        <div class="column-dot" style="background:var(--column-andamento)"></div>
+        <span class="column-title">Em Andamento</span>
+        <span class="column-count" id="countAndamento">0</span>
+      </div>
+      <button class="column-add-btn" onclick="openModal('andamento')" data-tooltip="Adicionar tarefa">+</button>
+    </div>
+    <div class="card-list" data-status="andamento"></div>
+  </div>
+  <div class="column" data-status="revisao">
+    <div class="column-header">
+      <div class="column-title-group">
+        <div class="column-dot" style="background:var(--column-revisao)"></div>
+        <span class="column-title">Em Revisão</span>
+        <span class="column-count" id="countRevisao">0</span>
+      </div>
+      <button class="column-add-btn" onclick="openModal('revisao')" data-tooltip="Adicionar tarefa">+</button>
+    </div>
+    <div class="card-list" data-status="revisao"></div>
+  </div>
+  <div class="column" data-status="concluido">
+    <div class="column-header">
+      <div class="column-title-group">
+        <div class="column-dot" style="background:var(--column-concluido)"></div>
+        <span class="column-title">Concluído</span>
+        <span class="column-count" id="countConcluido">0</span>
+      </div>
+      <button class="column-add-btn" onclick="openModal('concluido')" data-tooltip="Adicionar tarefa">+</button>
+    </div>
+    <div class="card-list" data-status="concluido"></div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="context-menu" id="contextMenu">
+  <button onclick="editTask()">✏️ Editar</button>
+  <button onclick="duplicateTask()">📋 Duplicar</button>
+  <div class="sep"></div>
+  <button class="danger" onclick="deleteTask()">🗑️ Excluir</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Nova Tarefa</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Area Selector -->
+      <div class="form-group">
+        <label>Área</label>
+      </div>
+      <div class="area-selector" id="areaSelector">
+        <div class="area-option selected" data-area="venda" onclick="selectArea(this)">
+          <div class="area-option-icon">💰</div>
+          Venda
+        </div>
+        <div class="area-option" data-area="entrega" onclick="selectArea(this)">
+          <div class="area-option-icon">📦</div>
+          Entrega
+        </div>
+        <div class="area-option" data-area="estrategia" onclick="selectArea(this)">
+          <div class="area-option-icon">🎯</div>
+          Estratégia
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Título</label>
+        <input type="text" id="taskTitle" placeholder="Ex: Criar campanha de marketing">
+      </div>
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea id="taskDesc" placeholder="Detalhes da tarefa..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prioridade</label>
+          <select id="taskPriority">
+            <option value="alta">Alta</option>
+            <option value="media" selected>Média</option>
+            <option value="baixa">Baixa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="taskStatus">
+            <option value="afazer">A Fazer</option>
+            <option value="andamento">Em Andamento</option>
+            <option value="revisao">Em Revisão</option>
+            <option value="concluido">Concluído</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data Limite</label>
+          <input type="date" id="taskDate">
+        </div>
+        <div class="form-group">
+          <label>Responsável</label>
+          <select id="taskAssignee">
+            <option value="">Selecionar...</option>
+            <option value="Bruno">Bruno</option>
+            <option value="Pietro">Pietro</option>
+            <option value="Maurício">Maurício</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="taskCategory">
+          <option value="">Sem categoria</option>
+          <option value="marketing">Marketing</option>
+          <option value="financeiro">Financeiro</option>
+          <option value="operacional">Operacional</option>
+          <option value="vendas">Vendas</option>
+          <option value="tech">Tech</option>
+          <option value="rh">RH</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveTask()" id="btnSave">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'workflow_tasks_v2';
+const PEOPLE_KEY = 'workflow_people_v1';
+
+let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+// Migrate old tasks without area
+tasks.forEach(t => { if (!t.area) t.area = 'venda'; });
+
+let currentArea = 'venda';
+let currentFilter = 'all';
+let currentCatFilter = null;
+let searchQuery = '';
+let editingId = null;
+let contextTaskId = null;
+let selectedModalArea = 'venda';
+
+const areaLabels = { venda: 'Venda', entrega: 'Entrega', estrategia: 'Estratégia' };
+
+function avatarClass(name) {
+  if (!name) return 'av-1';
+  const colors = ['av-1','av-2','av-3','av-4','av-5','av-6'];
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return colors[Math.abs(h) % colors.length];
+}
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+}
+function dateStatus(dateStr) {
+  if (!dateStr) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr + 'T12:00:00');
+  const diff = (d - today) / (1000*60*60*24);
+  if (diff < 0) return 'overdue';
+  if (diff <= 2) return 'soon';
+  return '';
+}
+
+const categoryLabels = {
+  marketing:'Marketing', financeiro:'Financeiro', operacional:'Operacional',
+  vendas:'Vendas', tech:'Tech', rh:'RH'
+};
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+function genId() { return 't_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+
+function getFiltered() {
+  let f = tasks.filter(t => t.area === currentArea);
+  if (currentFilter !== 'all') f = f.filter(t => t.priority === currentFilter);
+  if (currentCatFilter) f = f.filter(t => t.category === currentCatFilter);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    f = f.filter(t =>
+      (t.title||'').toLowerCase().includes(q) ||
+      (t.description||'').toLowerCase().includes(q) ||
+      (t.assignee||'').toLowerCase().includes(q)
+    );
+  }
+  return f;
+}
+
+function render() {
+  const statuses = ['afazer','andamento','revisao','concluido'];
+  const filtered = getFiltered();
+  const areaTasks = tasks.filter(t => t.area === currentArea);
+
+  statuses.forEach(s => {
+    const list = document.querySelector(`.card-list[data-status="${s}"]`);
+    const items = filtered.filter(t => t.status === s);
+    list.innerHTML = items.length ? items.map(cardHTML).join('') : emptyHTML();
+    const allForStatus = areaTasks.filter(t => t.status === s).length;
+    const countEl = document.getElementById('count' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (countEl) countEl.textContent = allForStatus;
+  });
+
+  // stats (for current area)
+  document.getElementById('statTodo').textContent = areaTasks.filter(t => t.status === 'afazer').length;
+  document.getElementById('statProgress').textContent = areaTasks.filter(t => t.status === 'andamento').length;
+  document.getElementById('statReview').textContent = areaTasks.filter(t => t.status === 'revisao').length;
+  document.getElementById('statDone').textContent = areaTasks.filter(t => t.status === 'concluido').length;
+
+  // area tab counts (total per area)
+  document.getElementById('areaCountVenda').textContent = tasks.filter(t => t.area === 'venda').length;
+  document.getElementById('areaCountEntrega').textContent = tasks.filter(t => t.area === 'entrega').length;
+  document.getElementById('areaCountEstrategia').textContent = tasks.filter(t => t.area === 'estrategia').length;
+
+  initDragDrop();
+}
+
+function cardHTML(t) {
+  const ds = dateStatus(t.dueDate);
+  return `
+  <div class="task-card" draggable="true" data-id="${t.id}" data-priority="${t.priority}">
+    <div class="card-top">
+      <span class="priority-badge ${t.priority}">${t.priority === 'media' ? 'Média' : t.priority.charAt(0).toUpperCase() + t.priority.slice(1)}</span>
+      <button class="card-menu-btn" onclick="showContextMenu(event,'${t.id}')">⋯</button>
+    </div>
+    <div class="card-title">${esc(t.title)}</div>
+    ${t.description ? `<div class="card-desc">${esc(t.description)}</div>` : ''}
+    ${t.category ? `<div class="card-tags"><span class="tag ${t.category}">${categoryLabels[t.category]||t.category}</span></div>` : ''}
+    <div class="card-footer">
+      <div class="card-footer-left">
+        ${t.dueDate ? `<span class="card-date ${ds}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${formatDate(t.dueDate)}</span>` : ''}
+      </div>
+      ${t.assignee ? `<div class="avatar ${avatarClass(t.assignee)}" data-tooltip="${esc(t.assignee)}">${initials(t.assignee)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function emptyHTML() {
+  return `<div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+    Nenhuma tarefa
+  </div>`;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// ─── AREA SWITCHING ───
+function switchArea(area, btn) {
+  currentArea = area;
+  document.querySelectorAll('.area-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ─── MODAL AREA SELECTOR ───
+function selectArea(el) {
+  document.querySelectorAll('.area-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedModalArea = el.dataset.area;
+}
+
+// ─── DRAG & DROP ───
+function initDragDrop() {
+  document.querySelectorAll('.task-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      card.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', card.dataset.id);
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.card-list').forEach(list => {
+    list.addEventListener('dragover', e => {
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      list.classList.add('drag-over');
+    });
+    list.addEventListener('dragleave', () => list.classList.remove('drag-over'));
+    list.addEventListener('drop', e => {
+      e.preventDefault(); list.classList.remove('drag-over');
+      const id = e.dataTransfer.getData('text/plain');
+      const newStatus = list.dataset.status;
+      const task = tasks.find(t => t.id === id);
+      if (task && task.status !== newStatus) {
+        task.status = newStatus;
+        save(); render();
+      }
+    });
+  });
+}
+
+// ─── MODAL ───
+function openModal(status) {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Nova Tarefa';
+  document.getElementById('taskTitle').value = '';
+  document.getElementById('taskDesc').value = '';
+  document.getElementById('taskPriority').value = 'media';
+  document.getElementById('taskStatus').value = status || 'afazer';
+  document.getElementById('taskDate').value = '';
+  document.getElementById('taskAssignee').value = '';
+  document.getElementById('taskCategory').value = '';
+  // Set area to current area
+  selectedModalArea = currentArea;
+  document.querySelectorAll('.area-option').forEach(o => {
+    o.classList.toggle('selected', o.dataset.area === currentArea);
+  });
+  document.getElementById('btnSave').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg> Salvar';
+  document.getElementById('modalOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('taskTitle').focus(), 200);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  editingId = null;
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function saveTask() {
+  const title = document.getElementById('taskTitle').value.trim();
+  if (!title) { document.getElementById('taskTitle').focus(); return; }
+
+  const data = {
+    title,
+    description: document.getElementById('taskDesc').value.trim(),
+    priority: document.getElementById('taskPriority').value,
+    status: document.getElementById('taskStatus').value,
+    dueDate: document.getElementById('taskDate').value,
+    assignee: document.getElementById('taskAssignee').value,
+    category: document.getElementById('taskCategory').value,
+    area: selectedModalArea,
+  };
+
+  if (editingId) {
+    const t = tasks.find(t => t.id === editingId);
+    if (t) Object.assign(t, data);
+  } else {
+    data.id = genId();
+    data.createdAt = new Date().toISOString();
+    tasks.push(data);
+  }
+
+  if (data.assignee) {
+    const sel = document.getElementById('taskAssignee');
+    const exists = [...sel.options].some(o => o.value === data.assignee);
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.value = data.assignee; opt.textContent = data.assignee;
+      sel.appendChild(opt); savePeople();
+    }
+  }
+
+  // Switch to the task's area if different
+  if (data.area !== currentArea) {
+    currentArea = data.area;
+    document.querySelectorAll('.area-tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.area === currentArea);
+    });
+  }
+
+  save(); closeModal(); render();
+}
+
+// ─── CONTEXT MENU ───
+function showContextMenu(e, id) {
+  e.stopPropagation();
+  contextTaskId = id;
+  const menu = document.getElementById('contextMenu');
+  menu.style.top = e.clientY + 'px';
+  menu.style.left = e.clientX + 'px';
+  menu.classList.add('show');
+}
+document.addEventListener('click', () => {
+  document.getElementById('contextMenu').classList.remove('show');
+});
+
+function editTask() {
+  const t = tasks.find(t => t.id === contextTaskId);
+  if (!t) return;
+  editingId = t.id;
+  document.getElementById('modalTitle').textContent = 'Editar Tarefa';
+  document.getElementById('taskTitle').value = t.title;
+  document.getElementById('taskDesc').value = t.description || '';
+  document.getElementById('taskPriority').value = t.priority;
+  document.getElementById('taskStatus').value = t.status;
+  document.getElementById('taskDate').value = t.dueDate || '';
+  document.getElementById('taskAssignee').value = t.assignee || '';
+  document.getElementById('taskCategory').value = t.category || '';
+  selectedModalArea = t.area || 'venda';
+  document.querySelectorAll('.area-option').forEach(o => {
+    o.classList.toggle('selected', o.dataset.area === selectedModalArea);
+  });
+  document.getElementById('btnSave').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg> Atualizar';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function duplicateTask() {
+  const t = tasks.find(t => t.id === contextTaskId);
+  if (!t) return;
+  tasks.push({ ...t, id: genId(), title: t.title + ' (cópia)', createdAt: new Date().toISOString() });
+  save(); render();
+}
+
+function deleteTask() {
+  tasks = tasks.filter(t => t.id !== contextTaskId);
+  save(); render();
+}
+
+// ─── FILTERS ───
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('[data-filter]').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+function setCatFilter(cat, btn) {
+  if (currentCatFilter === cat) {
+    currentCatFilter = null; btn.classList.remove('active');
+  } else {
+    document.querySelectorAll('[data-cat]').forEach(c => c.classList.remove('active'));
+    currentCatFilter = cat; btn.classList.add('active');
+  }
+  render();
+}
+
+// ─── SEARCH ───
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value; render();
+});
+
+// ─── PEOPLE PERSISTENCE ───
+function loadPeople() {
+  const people = JSON.parse(localStorage.getItem(PEOPLE_KEY) || '[]');
+  const sel = document.getElementById('taskAssignee');
+  people.forEach(name => {
+    if (![...sel.options].some(o => o.value === name)) {
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    }
+  });
+}
+function savePeople() {
+  const sel = document.getElementById('taskAssignee');
+  const people = [...sel.options].map(o => o.value).filter(v => v);
+  localStorage.setItem(PEOPLE_KEY, JSON.stringify(people));
+}
+
+// ─── KEYBOARD ───
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'n' && !e.ctrlKey && !e.metaKey &&
+      !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+    openModal();
+  }
+});
+
+// ─── SEED TASKS ───
+function seedTasks() {
+  if (localStorage.getItem('workflow_seeded_v3')) return;
+  const seed = [
+    // ══════════ ESTRATÉGIA ══════════
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir oferta irresistível e preço',description:'Estruturar a oferta principal, bônus, ancoragem de preço e garantia. Definir ticket e condições de pagamento.',category:'vendas',assignee:'Bruno',dueDate:'2026-04-15'},
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Mapear público-alvo e avatar',description:'Definir persona principal, dores, desejos, objeções e nível de consciência do lead.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-15'},
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir orçamento e meta de ads',description:'Calcular CPA desejado, budget diário, meta de leads e vendas para o período de teste e escala.',category:'financeiro',assignee:'Bruno',dueDate:'2026-04-16'},
+    {area:'estrategia',status:'afazer',priority:'alta',title:'Criar cronograma completo do lançamento',description:'Definir datas de cada etapa: produção, teste de ads, otimização, escala e encerramento.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-16'},
+    {area:'estrategia',status:'afazer',priority:'media',title:'Análise de concorrência e benchmark',description:'Pesquisar concorrentes diretos, analisar suas páginas, VSLs, ofertas e posicionamento.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-17'},
+    {area:'estrategia',status:'afazer',priority:'media',title:'Definir esteira de produtos e upsell',description:'Mapear order bump, upsell e downsell para maximizar o ticket médio do funil.',category:'vendas',assignee:'Bruno',dueDate:'2026-04-18'},
+    {area:'estrategia',status:'afazer',priority:'media',title:'Planejar estratégia de escala de ads',description:'Definir critérios de validação de criativos, regras de escala vertical e horizontal, e KPIs de corte.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-20'},
+    {area:'estrategia',status:'afazer',priority:'baixa',title:'Definir estratégia de retargeting',description:'Estruturar públicos de retargeting por etapa do funil: visitou página, iniciou checkout, abandonou.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-22'},
+
+    // ══════════ VENDA ══════════
+    // --- Página de vendas ---
+    {area:'venda',status:'afazer',priority:'alta',title:'Revisar página de vendas atual',description:'Analisar estrutura, headlines, CTAs, prova social e pontos de melhoria da página atual.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-16'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Revisar copy da VSL',description:'Revisar roteiro completo: gancho, história, mecanismo único, oferta, ancoragem, urgência e CTA.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-17'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Produzir VSL',description:'Gravar a VSL com base no roteiro aprovado. Garantir boa iluminação, áudio e enquadramento.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-19'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Editar VSL',description:'Edição profissional com cortes dinâmicos, legendas, gráficos, B-roll e motion graphics.',category:'tech',assignee:'Maurício',dueDate:'2026-04-21'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Criar página de vendas com VSL',description:'Montar nova página de vendas integrando a VSL editada, copy otimizada, depoimentos e checkout.',category:'tech',assignee:'Maurício',dueDate:'2026-04-23'},
+
+    // --- Ads ---
+    {area:'venda',status:'afazer',priority:'alta',title:'Escrever copy dos ads',description:'Criar variações de copy para Facebook/Instagram Ads: ganchos diferentes, ângulos de dor e desejo.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-18'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Produzir criativos dos ads',description:'Gravar/criar os criativos de vídeo e imagem para os anúncios. Mínimo 5 variações de gancho.',category:'marketing',assignee:'Maurício',dueDate:'2026-04-20'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Editar criativos dos ads',description:'Editar os vídeos dos ads com legendas, cortes rápidos e formato adequado para cada placement.',category:'tech',assignee:'Maurício',dueDate:'2026-04-22'},
+    {area:'venda',status:'afazer',priority:'alta',title:'Subir teste de ads',description:'Configurar campanhas de teste no Facebook Ads: estrutura ABO, públicos, placements e budget de teste.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-24'},
+    {area:'venda',status:'afazer',priority:'media',title:'Analisar resultados dos testes de ads',description:'Avaliar CTR, CPC, CPL, taxa de conversão e ROAS dos primeiros testes para identificar winners.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-27'},
+    {area:'venda',status:'afazer',priority:'media',title:'Otimizar e escalar ads vencedores',description:'Escalar os criativos e públicos vencedores. Aplicar duplicação, aumento de budget progressivo.',category:'marketing',assignee:'Pietro',dueDate:'2026-04-29'},
+
+    // --- Funil e automação ---
+    {area:'venda',status:'afazer',priority:'alta',title:'Configurar pixel e tracking',description:'Instalar/revisar pixel do Facebook, API de conversões, UTMs e eventos de conversão no checkout.',category:'tech',assignee:'Pietro',dueDate:'2026-04-17'},
+    {area:'venda',status:'afazer',priority:'media',title:'Criar sequência de emails de vendas',description:'Escrever fluxo de emails: boas-vindas, conteúdo, abertura de carrinho, objeções e urgência.',category:'marketing',assignee:'Bruno',dueDate:'2026-04-20'},
+    {area:'venda',status:'afazer',priority:'media',title:'Configurar checkout e pagamento',description:'Revisar página de checkout, configurar formas de pagamento, order bump e pixel de compra.',category:'tech',assignee:'Pietro',dueDate:'2026-04-18'},
+    {area:'venda',status:'afazer',priority:'media',title:'Criar página de captura',description:'Desenvolver landing page de captura de leads com headline forte, benefícios e formulário.',category:'tech',assignee:'Maurício',dueDate:'2026-04-19'},
+    {area:'venda',status:'afazer',priority:'baixa',title:'Configurar automações de WhatsApp',description:'Criar fluxo de mensagens automáticas pós-lead e pós-compra via WhatsApp.',category:'tech',assignee:'Pietro',dueDate:'2026-04-25'},
+
+    // ══════════ ENTREGA ══════════
+    {area:'entrega',status:'afazer',priority:'alta',title:'Estruturar conteúdo dos módulos',description:'Definir grade curricular, módulos, aulas e entregáveis de cada etapa da mentoria/curso.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-18'},
+    {area:'entrega',status:'afazer',priority:'alta',title:'Gravar aulas e conteúdo',description:'Produzir as videoaulas dos módulos com roteiro, slides e demonstrações práticas.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-25'},
+    {area:'entrega',status:'afazer',priority:'alta',title:'Editar aulas gravadas',description:'Edição das aulas: cortes, inserção de slides, legendas e identidade visual.',category:'tech',assignee:'Maurício',dueDate:'2026-04-28'},
+    {area:'entrega',status:'afazer',priority:'alta',title:'Configurar área de membros',description:'Setup da plataforma de entrega: criar módulos, fazer upload das aulas, configurar liberação.',category:'tech',assignee:'Pietro',dueDate:'2026-04-29'},
+    {area:'entrega',status:'afazer',priority:'media',title:'Criar materiais de apoio',description:'Desenvolver PDFs, checklists, templates e planilhas complementares às aulas.',category:'operacional',assignee:'Bruno',dueDate:'2026-04-27'},
+    {area:'entrega',status:'afazer',priority:'media',title:'Configurar grupo de alunos',description:'Criar e configurar grupo exclusivo (Telegram/WhatsApp) com regras, boas-vindas e organização.',category:'operacional',assignee:'Pietro',dueDate:'2026-04-28'},
+    {area:'entrega',status:'afazer',priority:'media',title:'Criar fluxo de onboarding do aluno',description:'Montar sequência de boas-vindas: email, acesso à plataforma, grupo e primeiros passos.',category:'operacional',assignee:'Pietro',dueDate:'2026-04-29'},
+    {area:'entrega',status:'afazer',priority:'baixa',title:'Preparar suporte e FAQ',description:'Documentar perguntas frequentes, criar respostas padrão e definir processo de atendimento.',category:'operacional',assignee:'Maurício',dueDate:'2026-04-30'},
+  ];
+
+  seed.forEach((t,i) => {
+    t.id = 't_seed_' + i + '_' + Math.random().toString(36).slice(2,7);
+    t.createdAt = new Date().toISOString();
+  });
+
+  tasks = seed;
+  save();
+  localStorage.setItem('workflow_seeded_v3','1');
+}
+
+// ─── INIT ───
+seedTasks();
+loadPeople();
+render();
+</script>
+</body>
+</html>
