@@ -52,8 +52,8 @@ body{
   font-family:'DM Sans',sans-serif;
   background:var(--bg-deep);
   color:var(--text-primary);
-  min-height:100vh;
-  overflow-x:hidden;
+  height:100vh;
+  overflow:hidden;
 }
 body::before{
   content:'';position:fixed;inset:0;
@@ -259,6 +259,7 @@ body::before{
 .task-card{
   background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
   padding:.85rem;cursor:grab;transition:var(--transition);position:relative;overflow:hidden;
+  flex-shrink:0;
 }
 .task-card::before{
   content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;
