@@ -1116,40 +1116,149 @@ document.addEventListener('keydown', e => {
 
 // ─── SEED TASKS ───
 function seedTasks() {
-  if (localStorage.getItem('workflow_seeded_v4')) return;
+  if (localStorage.getItem('workflow_seeded_v5')) return;
+  const A='alta',M='media',B='baixa',S='afazer';
+  const BR=['Bruno'],PI=['Pietro'],MA=['Maurício'];
+  const BP=['Bruno','Pietro'],BM=['Bruno','Maurício'],PM=['Pietro','Maurício'];
+  const BPM=['Bruno','Pietro','Maurício'];
+
   const seed = [
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir oferta irresistível e preço',description:'Estruturar a oferta principal, bônus, ancoragem de preço e garantia. Definir ticket e condições de pagamento.',category:'vendas',assignees:['Bruno'],dueDate:'2026-04-15'},
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Mapear público-alvo e avatar',description:'Definir persona principal, dores, desejos, objeções e nível de consciência do lead.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-15'},
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Definir orçamento e meta de ads',description:'Calcular CPA desejado, budget diário, meta de leads e vendas para o período de teste e escala.',category:'financeiro',assignees:['Bruno','Pietro'],dueDate:'2026-04-16'},
-    {area:'estrategia',status:'afazer',priority:'alta',title:'Criar cronograma completo do lançamento',description:'Definir datas de cada etapa: produção, teste de ads, otimização, escala e encerramento.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-16'},
-    {area:'estrategia',status:'afazer',priority:'media',title:'Análise de concorrência e benchmark',description:'Pesquisar concorrentes diretos, analisar suas páginas, VSLs, ofertas e posicionamento.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-17'},
-    {area:'estrategia',status:'afazer',priority:'media',title:'Definir esteira de produtos e upsell',description:'Mapear order bump, upsell e downsell para maximizar o ticket médio do funil.',category:'vendas',assignees:['Bruno'],dueDate:'2026-04-18'},
-    {area:'estrategia',status:'afazer',priority:'media',title:'Planejar estratégia de escala de ads',description:'Definir critérios de validação de criativos, regras de escala vertical e horizontal, e KPIs de corte.',category:'marketing',assignees:['Bruno','Pietro'],dueDate:'2026-04-20'},
-    {area:'estrategia',status:'afazer',priority:'baixa',title:'Definir estratégia de retargeting',description:'Estruturar públicos de retargeting por etapa do funil: visitou página, iniciou checkout, abandonou.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-22'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Revisar página de vendas atual',description:'Analisar estrutura, headlines, CTAs, prova social e pontos de melhoria da página atual.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-16'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Revisar copy da VSL',description:'Revisar roteiro completo: gancho, história, mecanismo único, oferta, ancoragem, urgência e CTA.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-17'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Produzir VSL',description:'Gravar a VSL com base no roteiro aprovado. Garantir boa iluminação, áudio e enquadramento.',category:'marketing',assignees:['Bruno','Maurício'],dueDate:'2026-04-19'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Editar VSL',description:'Edição profissional com cortes dinâmicos, legendas, gráficos, B-roll e motion graphics.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-21'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Criar página de vendas com VSL',description:'Montar nova página de vendas integrando a VSL editada, copy otimizada, depoimentos e checkout.',category:'tech',assignees:['Maurício','Pietro'],dueDate:'2026-04-23'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Escrever copy dos ads',description:'Criar variações de copy para Facebook/Instagram Ads: ganchos diferentes, ângulos de dor e desejo.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-18'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Produzir criativos dos ads',description:'Gravar/criar os criativos de vídeo e imagem para os anúncios. Mínimo 5 variações de gancho.',category:'marketing',assignees:['Bruno','Maurício'],dueDate:'2026-04-20'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Editar criativos dos ads',description:'Editar os vídeos dos ads com legendas, cortes rápidos e formato adequado para cada placement.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-22'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Subir teste de ads',description:'Configurar campanhas de teste no Facebook Ads: estrutura ABO, públicos, placements e budget de teste.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-24'},
-    {area:'venda',status:'afazer',priority:'media',title:'Analisar resultados dos testes de ads',description:'Avaliar CTR, CPC, CPL, taxa de conversão e ROAS dos primeiros testes para identificar winners.',category:'marketing',assignees:['Pietro','Bruno'],dueDate:'2026-04-27'},
-    {area:'venda',status:'afazer',priority:'media',title:'Otimizar e escalar ads vencedores',description:'Escalar os criativos e públicos vencedores. Aplicar duplicação, aumento de budget progressivo.',category:'marketing',assignees:['Pietro'],dueDate:'2026-04-29'},
-    {area:'venda',status:'afazer',priority:'alta',title:'Configurar pixel e tracking',description:'Instalar/revisar pixel do Facebook, API de conversões, UTMs e eventos de conversão no checkout.',category:'tech',assignees:['Pietro'],dueDate:'2026-04-17'},
-    {area:'venda',status:'afazer',priority:'media',title:'Criar sequência de emails de vendas',description:'Escrever fluxo de emails: boas-vindas, conteúdo, abertura de carrinho, objeções e urgência.',category:'marketing',assignees:['Bruno'],dueDate:'2026-04-20'},
-    {area:'venda',status:'afazer',priority:'media',title:'Configurar checkout e pagamento',description:'Revisar página de checkout, configurar formas de pagamento, order bump e pixel de compra.',category:'tech',assignees:['Pietro'],dueDate:'2026-04-18'},
-    {area:'venda',status:'afazer',priority:'media',title:'Criar página de captura',description:'Desenvolver landing page de captura de leads com headline forte, benefícios e formulário.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-19'},
-    {area:'venda',status:'afazer',priority:'baixa',title:'Configurar automações de WhatsApp',description:'Criar fluxo de mensagens automáticas pós-lead e pós-compra via WhatsApp.',category:'tech',assignees:['Pietro'],dueDate:'2026-04-25'},
-    {area:'entrega',status:'afazer',priority:'alta',title:'Estruturar conteúdo dos módulos',description:'Definir grade curricular, módulos, aulas e entregáveis de cada etapa da mentoria/curso.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-18'},
-    {area:'entrega',status:'afazer',priority:'alta',title:'Gravar aulas e conteúdo',description:'Produzir as videoaulas dos módulos com roteiro, slides e demonstrações práticas.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-25'},
-    {area:'entrega',status:'afazer',priority:'alta',title:'Editar aulas gravadas',description:'Edição das aulas: cortes, inserção de slides, legendas e identidade visual.',category:'tech',assignees:['Maurício'],dueDate:'2026-04-28'},
-    {area:'entrega',status:'afazer',priority:'alta',title:'Configurar área de membros',description:'Setup da plataforma de entrega: criar módulos, fazer upload das aulas, configurar liberação.',category:'tech',assignees:['Pietro','Maurício'],dueDate:'2026-04-29'},
-    {area:'entrega',status:'afazer',priority:'media',title:'Criar materiais de apoio',description:'Desenvolver PDFs, checklists, templates e planilhas complementares às aulas.',category:'operacional',assignees:['Bruno'],dueDate:'2026-04-27'},
-    {area:'entrega',status:'afazer',priority:'media',title:'Configurar grupo de alunos',description:'Criar e configurar grupo exclusivo (Telegram/WhatsApp) com regras, boas-vindas e organização.',category:'operacional',assignees:['Pietro'],dueDate:'2026-04-28'},
-    {area:'entrega',status:'afazer',priority:'media',title:'Criar fluxo de onboarding do aluno',description:'Montar sequência de boas-vindas: email, acesso à plataforma, grupo e primeiros passos.',category:'operacional',assignees:['Pietro','Bruno'],dueDate:'2026-04-29'},
-    {area:'entrega',status:'afazer',priority:'baixa',title:'Preparar suporte e FAQ',description:'Documentar perguntas frequentes, criar respostas padrão e definir processo de atendimento.',category:'operacional',assignees:['Maurício'],dueDate:'2026-04-30'},
+    // ══════════════════ BLOCO 0 — REUNIÃO DE TIME (ESTRATÉGIA) ══════════════════
+    {area:'estrategia',status:S,priority:A,title:'Agendar e realizar reunião de time',description:'Bloco 0 — Reunir Bruno, Pietro e Maurício hoje ou amanhã cedo para alinhar o lançamento.',category:'operacional',assignees:BPM,dueDate:'2026-04-15'},
+    {area:'estrategia',status:S,priority:A,title:'Definir divisão exata de tarefas entre o time',description:'Bloco 0 — Alocar responsáveis de cada bloco: Bruno, Pietro e Maurício.',category:'operacional',assignees:BPM,dueDate:'2026-04-15'},
+    {area:'estrategia',status:S,priority:A,title:'Confirmar ou redefinir nome do evento',description:'Bloco 0 — Decidir definitivamente o nome (Imersão Blue Ocean ou outro).',category:'marketing',assignees:BR,dueDate:'2026-04-15'},
+    {area:'estrategia',status:S,priority:A,title:'Definir stack completa de upsells, downsells e order bumps',description:'Bloco 0 — Mínimo 2 upsells, 2 downsells e 2 order bumps.',category:'vendas',assignees:BR,dueDate:'2026-04-15'},
+    {area:'estrategia',status:S,priority:M,title:'Definir palavra-chave trigger do ManyChat',description:'Bloco 0 — Escolher palavra-chave para disparar DM automática via ManyChat nos stories.',category:'marketing',assignees:BP,dueDate:'2026-04-15'},
+    {area:'estrategia',status:S,priority:A,title:'Decidir plataforma de hospedagem (Vercel ou Turbo Cloud)',description:'Bloco 0 — Definir onde hospedar as páginas do funil.',category:'tech',assignees:PM,dueDate:'2026-04-15'},
+    {area:'estrategia',status:S,priority:M,title:'Definir horário-limite das calls de venda no sábado',description:'Bloco 0 — Estabelecer janela de escassez para as calls pós-evento.',category:'vendas',assignees:BR,dueDate:'2026-04-15'},
+    {area:'estrategia',status:S,priority:A,title:'Solicitar depoimentos em vídeo dos alunos',description:'Bloco 0 — Pedir vídeos: Andressa, João, Ian Gabriel, Maurício, Matheus.',category:'marketing',assignees:BR,dueDate:'2026-04-15'},
+
+    // ══════════════════ BLOCO 1 — OFERTA E CHECKOUT KIWIFY (VENDA) ══════════════════
+    {area:'venda',status:S,priority:A,title:'Criar produto "Ingresso — Imersão Blue Ocean" no Kiwify',description:'Bloco 1 — Configurar produto a R$27 no Kiwify.',category:'tech',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Configurar Order Bump 1 no checkout',description:'Bloco 1 — Criar e integrar primeiro order bump (a definir).',category:'vendas',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Configurar Order Bump 2 no checkout',description:'Bloco 1 — Criar e integrar segundo order bump (a definir).',category:'vendas',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Criar produto Upsell 1',description:'Bloco 1 — Primeiro upsell pós-compra (a definir).',category:'vendas',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Criar produto Upsell 2',description:'Bloco 1 — Segundo upsell pós-compra (a definir).',category:'vendas',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:M,title:'Criar Downsell 1 e Downsell 2',description:'Bloco 1 — Downsells para quem recusar upsells (a definir).',category:'vendas',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Configurar sequência completa de upsell/downsell no Kiwify',description:'Bloco 1 — Montar fluxo completo de upgrades pós-compra.',category:'tech',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Ativar integração nativa Kiwify com Meta (Pixel + CAPI)',description:'Bloco 1 — Conectar Kiwify ao Meta para tracking completo.',category:'tech',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Testar fluxo completo: captura → checkout → upsell → área de membros',description:'Bloco 1 — Teste end-to-end do funil inteiro.',category:'tech',assignees:PM,dueDate:'2026-04-17'},
+
+    // ══════════════════ BLOCO 2 — DOMÍNIO E INFRAESTRUTURA (VENDA) ══════════════════
+    {area:'venda',status:S,priority:A,title:'Apontar DNS do brunosiviero.com.br para Vercel/Turbo Cloud',description:'Bloco 2 — Configurar DNS raiz do domínio.',category:'tech',assignees:MA,dueDate:'2026-04-15'},
+    {area:'venda',status:S,priority:A,title:'Configurar subdomínios inscricao / quiz / vsl',description:'Bloco 2 — Criar subdomínios: inscricao., quiz., vsl.brunosiviero.com.br.',category:'tech',assignees:MA,dueDate:'2026-04-15'},
+    {area:'venda',status:S,priority:A,title:'Verificar SSL ativo em todos os subdomínios',description:'Bloco 2 — Garantir HTTPS funcionando em todos os subdomínios.',category:'tech',assignees:MA,dueDate:'2026-04-15'},
+    {area:'venda',status:S,priority:A,title:'Instalar e validar Meta Pixel em todas as páginas',description:'Bloco 2 — Pixel ID: 1732464043961939. Validar com Meta Pixel Helper.',category:'tech',assignees:PI,dueDate:'2026-04-16'},
+
+    // ══════════════════ BLOCO 3 — PÁGINAS DO FUNIL (VENDA) ══════════════════
+    // FASE 1 — PV + Quiz
+    {area:'venda',status:S,priority:A,title:'Criar página de captura pré-checkout (nome + email + tel)',description:'Bloco 3 Fase 1 — Form antes do Kiwify para capturar lead.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Configurar redirect pós-form para checkout Kiwify',description:'Bloco 3 Fase 1 — Pré-preencher campos no Kiwify via query string.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Configurar webhook do form para n8n (recuperação)',description:'Bloco 3 Fase 1 — Webhook inicia timer de recuperação de carrinho.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Escrever copy completa da Página de Vendas',description:'Bloco 3 Fase 1 — Copy completa: headline, subhead, benefícios, depoimentos, oferta, CTA.',category:'marketing',assignees:BR,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Desenvolver PV em HTML no inscricao.brunosiviero.com.br',description:'Bloco 3 Fase 1 — Build da Página de Vendas em HTML/Tailwind.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Testar responsivo mobile e velocidade da PV',description:'Bloco 3 Fase 1 — Validar mobile, tempo de carregamento (<3s) e Lighthouse.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Reescrever perguntas do quiz (2 versões A/B)',description:'Bloco 3 Fase 1 — Criar duas variações para teste A/B.',category:'marketing',assignees:BR,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Redesenhar quiz e migrar para quiz.brunosiviero.com.br',description:'Bloco 3 Fase 1 — Visual novo + host próprio do quiz.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Configurar resultado do quiz → redirect para PV',description:'Bloco 3 Fase 1 — Final do quiz leva para a página de vendas.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Criar página de confirmação pós-compra com link do grupo',description:'Bloco 3 Fase 1 — Thank you page com link do grupo de WhatsApp.',category:'tech',assignees:MA,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'Criar páginas de Upsell 1 e Upsell 2 com copy e CTA',description:'Bloco 3 Fase 1 — Páginas dos upsells integradas ao Kiwify.',category:'tech',assignees:BM,dueDate:'2026-04-18'},
+    // FASE 2 — VSL
+    {area:'venda',status:S,priority:A,title:'Escrever roteiro da VSL curta (5-10 min)',description:'Bloco 3 Fase 2 — Roteiro da VSL com gancho, mecanismo, oferta, CTA.',category:'marketing',assignees:BR,dueDate:'2026-04-20'},
+    {area:'venda',status:S,priority:A,title:'Gravar VSL',description:'Bloco 3 Fase 2 — Gravação com boa iluminação, áudio e enquadramento.',category:'marketing',assignees:BR,dueDate:'2026-04-21'},
+    {area:'venda',status:S,priority:A,title:'Editar VSL (legendas + b-roll + depoimentos)',description:'Bloco 3 Fase 2 — Edição profissional com cortes dinâmicos e legendas.',category:'tech',assignees:MA,dueDate:'2026-04-22'},
+    {area:'venda',status:S,priority:A,title:'Hospedar VSL (Pandavideo ou Vimeo)',description:'Bloco 3 Fase 2 — Upload e embed protegido.',category:'tech',assignees:MA,dueDate:'2026-04-22'},
+    {area:'venda',status:S,priority:A,title:'Criar página VSL no vsl.brunosiviero.com.br',description:'Bloco 3 Fase 2 — Página VSL com copy e CTA.',category:'tech',assignees:BM,dueDate:'2026-04-22'},
+
+    // ══════════════════ BLOCO 4 — AUTOMAÇÕES n8n + EVOLUTION + MAILCHIMP (VENDA) ══════════════════
+    {area:'venda',status:S,priority:A,title:'Fluxo de recuperação de carrinho (form → 3-5min → WhatsApp)',description:'Bloco 4 — n8n verifica se comprou, se não dispara WhatsApp via Evolution.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Escrever texto da mensagem de recuperação no WhatsApp',description:'Bloco 4 — Copy da mensagem de recuperação de carrinho.',category:'marketing',assignees:BR,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Configurar email de recuperação de carrinho no Mailchimp',description:'Bloco 4 — Automação de email para quem iniciou mas não finalizou compra.',category:'marketing',assignees:BP,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'Pós-compra: webhook dispara WhatsApp de boas-vindas',description:'Bloco 4 — Enviar link do grupo + área de membros automaticamente.',category:'tech',assignees:MA,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'Pós-compra: configurar email de confirmação no Mailchimp',description:'Bloco 4 — Email automático de confirmação pós-pagamento.',category:'marketing',assignees:BP,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'Entrada automática no grupo WhatsApp via n8n + Evolution',description:'Bloco 4 — Adicionar comprador ao grupo automaticamente.',category:'tech',assignees:MA,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'Testar fluxo end-to-end (form → compra → WhatsApp → email → grupo)',description:'Bloco 4 — Validação completa de todas as automações.',category:'tech',assignees:BPM,dueDate:'2026-04-19'},
+
+    // ══════════════════ BLOCO 5 — EMAIL MARKETING MAILCHIMP (VENDA) ══════════════════
+    {area:'venda',status:S,priority:A,title:'Criar nova lista no Mailchimp para o lançamento',description:'Bloco 5 — Lista segmentada para Imersão Blue Ocean.',category:'marketing',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Verificar domínio de envio (DKIM + SPF)',description:'Bloco 5 — Configurar DNS de envio do brunosiviero.com.br no Mailchimp.',category:'tech',assignees:MA,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'E-mail 1: confirmação de inscrição',description:'Bloco 5 — Boas-vindas + data + horário + link do grupo.',category:'marketing',assignees:BR,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'E-mail 2: aquecimento com prova social',description:'Bloco 5 — Prints e depoimentos de alunos.',category:'marketing',assignees:BR,dueDate:'2026-04-20'},
+    {area:'venda',status:S,priority:A,title:'E-mail 3: lembrete D-1 (sex 24/04)',description:'Bloco 5 — Urgência + link do grupo.',category:'marketing',assignees:BR,dueDate:'2026-04-22'},
+    {area:'venda',status:S,priority:A,title:'E-mail 4: lembrete D-0 às 7h30 (sáb 25/04)',description:'Bloco 5 — "Começa em 1h30".',category:'marketing',assignees:BR,dueDate:'2026-04-23'},
+    {area:'venda',status:S,priority:A,title:'E-mail 5: recuperação de carrinho',description:'Bloco 5 — Automação para quem não comprou.',category:'marketing',assignees:BR,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'E-mail 6: pós-evento com oferta 24-48h',description:'Bloco 5 — Para quem assistiu mas não comprou.',category:'marketing',assignees:BR,dueDate:'2026-04-23'},
+    {area:'venda',status:S,priority:M,title:'Importar base antiga + criar público no Meta',description:'Bloco 5 — Usar base antiga como público personalizado para ads.',category:'marketing',assignees:PI,dueDate:'2026-04-16'},
+
+    // ══════════════════ BLOCO 6 — CRIATIVOS (20 ÚNICOS) (VENDA) ══════════════════
+    {area:'venda',status:S,priority:A,title:'Definir 20 ângulos/conceitos únicos dos criativos',description:'Bloco 6 — Brainstorm de 20 ganchos/ângulos diferentes.',category:'marketing',assignees:BR,dueDate:'2026-04-15'},
+    {area:'venda',status:S,priority:A,title:'Reutilizar e adaptar criativo que performou na Imersão 2.0',description:'Bloco 6 — Identificar vencedores anteriores e adaptar.',category:'marketing',assignees:BP,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Gravar vídeos de câmera (mín 8-10 takes)',description:'Bloco 6 — Gravar takes com ângulos diferentes para criar variações.',category:'marketing',assignees:BR,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Receber vídeos de depoimento dos alunos (UGC)',description:'Bloco 6 — Coletar UGC dos alunos solicitados no Bloco 0.',category:'marketing',assignees:BR,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'Garimpar prints de resultados de alunos',description:'Bloco 6 — Prints WhatsApp e Instagram de resultados.',category:'marketing',assignees:BR,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Editar criativos em vídeo (legenda + hook + CTA)',description:'Bloco 6 — Hook nos 3 primeiros segundos, legenda animada, CTA final.',category:'tech',assignees:MA,dueDate:'2026-04-19'},
+    {area:'venda',status:S,priority:A,title:'Criar criativos de imagem com texto animado',description:'Bloco 6 — Criativos estáticos/motion com identidade visual.',category:'tech',assignees:MA,dueDate:'2026-04-19'},
+    {area:'venda',status:S,priority:A,title:'Criar criativos de depoimento em vídeo',description:'Bloco 6 — Depoimentos com identidade visual consistente.',category:'tech',assignees:MA,dueDate:'2026-04-19'},
+    {area:'venda',status:S,priority:M,title:'Nomear e organizar criativos em pasta padronizada',description:'Bloco 6 — Convenção de nomes para facilitar tracking.',category:'operacional',assignees:PI,dueDate:'2026-04-19'},
+    {area:'venda',status:S,priority:A,title:'Upload de todos os criativos no BM',description:'Bloco 6 — Subir biblioteca de criativos antes das campanhas.',category:'marketing',assignees:PI,dueDate:'2026-04-20'},
+    {area:'venda',status:S,priority:A,title:'Identificar criativos vencedores e duplicar',description:'Bloco 6 — Validar winners após testes e criar variações.',category:'marketing',assignees:PI,dueDate:'2026-04-21'},
+    {area:'venda',status:S,priority:M,title:'Adaptar criativos vencedores para rodar com a VSL',description:'Bloco 6 — Quando VSL estiver pronta, refazer criativos vencedores.',category:'marketing',assignees:PI,dueDate:'2026-04-22'},
+
+    // ══════════════════ BLOCO 7 — TRÁFEGO PAGO (VENDA) ══════════════════
+    {area:'venda',status:S,priority:A,title:'Verificar BM e conta de anúncios (sem restrições + pgto ativo)',description:'Bloco 7 — Garantir que tudo está operacional antes de subir.',category:'marketing',assignees:PI,dueDate:'2026-04-15'},
+    {area:'venda',status:S,priority:A,title:'Importar base antiga como público personalizado no Meta',description:'Bloco 7 — Subir lista para uso em campanhas.',category:'marketing',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Criar público Lookalike 1% da base antiga',description:'Bloco 7 — LAL 1% para prospecção fria.',category:'marketing',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Criar campanha de conversão para prospecção fria',description:'Bloco 7 — Campanha com objetivo Conversão → Lead/Compra.',category:'marketing',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Criar campanha de remarketing (base antiga + visitantes)',description:'Bloco 7 — Retargeting segmentado.',category:'marketing',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Distribuir budget (~R$4k prospecção + ~R$2k remarketing)',description:'Bloco 7 — Total R$6k do lançamento.',category:'financeiro',assignees:BP,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Subir primeiros criativos (destino PV + Quiz)',description:'Bloco 7 — Go live dos ads entre qui 17 ou sex 18/04.',category:'marketing',assignees:PI,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'X1 no WhatsApp para base antiga (30-40/dia por número)',description:'Bloco 7 — Envio manual controlado para evitar bloqueio.',category:'vendas',assignees:BR,dueDate:'2026-04-19'},
+    {area:'venda',status:S,priority:A,title:'Monitorar métricas diárias (CTR, CPL, CPA, conversão)',description:'Bloco 7 — Acompanhamento diário durante todo o lançamento.',category:'marketing',assignees:PI,dueDate:'2026-04-19'},
+    {area:'venda',status:S,priority:A,title:'Criar planilha de métricas do lançamento',description:'Bloco 7 — CPL por criativo, CPA, ROAS por campanha.',category:'operacional',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:M,title:'Escalar budget quando empatar/lucrar com ingressos',description:'Bloco 7 — Critério de escala: ROAS positivo no ingresso.',category:'marketing',assignees:BP,dueDate:'2026-04-22'},
+    {area:'venda',status:S,priority:M,title:'Testar criativos validados com a VSL',description:'Bloco 7 — Quando VSL estiver no ar, rodar com os winners.',category:'marketing',assignees:PI,dueDate:'2026-04-23'},
+
+    // ══════════════════ BLOCO 8 — WEBINÁRIO (ENTREGA) ══════════════════
+    {area:'entrega',status:S,priority:A,title:'Reescrever roteiro completo do Perfect Webinar (3h)',description:'Bloco 8 — Adaptar Perfect Webinar para 9h-12h.',category:'marketing',assignees:BR,dueDate:'2026-04-18'},
+    {area:'entrega',status:S,priority:A,title:'Preparar slides (Canva ou Claude Code)',description:'Bloco 8 — Slides seguindo estrutura do roteiro.',category:'marketing',assignees:BM,dueDate:'2026-04-21'},
+    {area:'entrega',status:S,priority:A,title:'Montar Grand Stack com valores da oferta',description:'Bloco 8 — Valor de cada componente da oferta (stack).',category:'vendas',assignees:BR,dueDate:'2026-04-20'},
+    {area:'entrega',status:S,priority:A,title:'Preparar slides de Price Marinade + garantia de 30 dias',description:'Bloco 8 — Ancoragem de preço + slide da garantia.',category:'vendas',assignees:BR,dueDate:'2026-04-21'},
+    {area:'entrega',status:S,priority:A,title:'Organizar prints de resultados financeiros para o evento',description:'Bloco 8 — Provas para mostrar na tela ao vivo.',category:'marketing',assignees:BR,dueDate:'2026-04-22'},
+    {area:'entrega',status:S,priority:A,title:'Criar formulário de intenção de compra',description:'Bloco 8 — Nome + WhatsApp + interesse (grupo R$3k / individual R$8k).',category:'vendas',assignees:MA,dueDate:'2026-04-20'},
+    {area:'entrega',status:S,priority:A,title:'Integrar formulário de intenção com Cal.com',description:'Bloco 8 — Agendamento automático de call ainda no sábado.',category:'tech',assignees:MA,dueDate:'2026-04-21'},
+    {area:'entrega',status:S,priority:A,title:'Gerar QR code + link encurtado do formulário',description:'Bloco 8 — Para disparar no pitch durante o evento.',category:'marketing',assignees:PI,dueDate:'2026-04-23'},
+    {area:'entrega',status:S,priority:A,title:'Criar sala Zoom com link fixo do evento',description:'Bloco 8 — Link fixo e testado.',category:'operacional',assignees:PI,dueDate:'2026-04-22'},
+    {area:'entrega',status:S,priority:A,title:'Configurar registro de participantes no Zoom',description:'Bloco 8 — Capturar nome + email na entrada.',category:'tech',assignees:PI,dueDate:'2026-04-22'},
+    {area:'entrega',status:S,priority:A,title:'Testar câmera, mic, tela, luz e cenário',description:'Bloco 8 — Setup técnico completo antes do evento.',category:'tech',assignees:BR,dueDate:'2026-04-24'},
+    {area:'entrega',status:S,priority:A,title:'Testar backup de internet (4G) e áudio',description:'Bloco 8 — Plano B para falhas técnicas.',category:'tech',assignees:BR,dueDate:'2026-04-24'},
+    {area:'entrega',status:S,priority:A,title:'Passagem geral do roteiro com o time',description:'Bloco 8 — Ensaio: timing, pitch, slides.',category:'operacional',assignees:BPM,dueDate:'2026-04-24'},
+
+    // ══════════════════ BLOCO 9 — AQUECIMENTO WHATSAPP + MANYCHAT (VENDA) ══════════════════
+    {area:'venda',status:S,priority:A,title:'Criar grupo de WhatsApp de aquecimento do lançamento',description:'Bloco 9 — Grupo exclusivo para essa imersão.',category:'operacional',assignees:PI,dueDate:'2026-04-16'},
+    {area:'venda',status:S,priority:A,title:'Configurar entrada automática no grupo via n8n + Evolution',description:'Bloco 9 — Add automaticamente após compra.',category:'tech',assignees:MA,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Configurar fluxo ManyChat: story → DM → link',description:'Bloco 9 — Automação de DM via trigger nos stories.',category:'tech',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Testar fluxo completo do ManyChat',description:'Bloco 9 — Validação end-to-end: story → DM → link → captura.',category:'tech',assignees:PI,dueDate:'2026-04-17'},
+    {area:'venda',status:S,priority:A,title:'Criar calendário de conteúdo do grupo (sáb 19 a sáb 25)',description:'Bloco 9 — Mensagens diárias de aquecimento.',category:'marketing',assignees:BR,dueDate:'2026-04-18'},
+    {area:'venda',status:S,priority:A,title:'Lembrete D-1 (sex 24/04 à noite) no grupo',description:'Bloco 9 — Mensagem de urgência.',category:'marketing',assignees:BR,dueDate:'2026-04-24'},
+    {area:'venda',status:S,priority:A,title:'Lembrete D-0 (sáb 25/04 às 7h30) no grupo',description:'Bloco 9 — "Começa em 1h30, entra agora".',category:'marketing',assignees:BR,dueDate:'2026-04-25'},
+    {area:'venda',status:S,priority:A,title:'Monitorar grupo durante o evento + disparar links',description:'Bloco 9 — Responder dúvidas e disparar link do Zoom e do formulário.',category:'operacional',assignees:PI,dueDate:'2026-04-25'},
+
+    // ══════════════════ BLOCO 10 — ÁREA DE MEMBROS KIWIFY (ENTREGA) ══════════════════
+    {area:'entrega',status:S,priority:A,title:'Configurar área de membros do ingresso + módulo "Marco Zero"',description:'Bloco 10 — Estrutura no Kiwify para compradores.',category:'tech',assignees:PI,dueDate:'2026-04-20'},
+    {area:'entrega',status:S,priority:A,title:'Gravar aula bônus "Marco Zero" (20-30 min)',description:'Bloco 10 — Introdução ao mercado internacional para iniciantes.',category:'operacional',assignees:BR,dueDate:'2026-04-21'},
+    {area:'entrega',status:S,priority:A,title:'Upload da aula na área de membros + testar acesso',description:'Bloco 10 — Verificar liberação e reprodução.',category:'tech',assignees:PI,dueDate:'2026-04-22'},
+    {area:'entrega',status:S,priority:M,title:'Configurar área de membros do replay (order bump)',description:'Bloco 10 — Estrutura para compradores do replay.',category:'tech',assignees:PI,dueDate:'2026-04-23'},
+    {area:'entrega',status:S,priority:M,title:'Configurar estrutura da mentoria (8 semanas de trilhas)',description:'Bloco 10 — Área de membros da mentoria para quem fechar.',category:'tech',assignees:PI,dueDate:'2026-04-24'},
+
+    // ══════════════════ BLOCO 11 — DIA DO EVENTO 25/04 (ENTREGA) ══════════════════
+    {area:'entrega',status:S,priority:A,title:'7h30 — Disparar lembrete final no grupo + email',description:'Bloco 11 — Último push pré-evento.',category:'operacional',assignees:BR,dueDate:'2026-04-25'},
+    {area:'entrega',status:S,priority:A,title:'8h45 — Bruno entra no Zoom e testa tudo',description:'Bloco 11 — Sala aberta 15 min antes.',category:'operacional',assignees:BR,dueDate:'2026-04-25'},
+    {area:'entrega',status:S,priority:A,title:'9h — Evento ao vivo (Imersão Blue Ocean)',description:'Bloco 11 — Evento principal 9h-12h.',category:'operacional',assignees:BR,dueDate:'2026-04-25'},
+    {area:'entrega',status:S,priority:A,title:'Durante o pitch — Disparar link do formulário no grupo',description:'Bloco 11 — Push de conversão no momento do pitch.',category:'vendas',assignees:PI,dueDate:'2026-04-25'},
+    {area:'entrega',status:S,priority:A,title:'12h+ — Calls de venda com quem preencheu o formulário',description:'Bloco 11 — Janela de escassez.',category:'vendas',assignees:BR,dueDate:'2026-04-25'},
+    {area:'entrega',status:S,priority:A,title:'Onboarding dos novos mentorados na própria call',description:'Bloco 11 — Fechar + onboardear no mesmo momento.',category:'vendas',assignees:BR,dueDate:'2026-04-25'},
+    {area:'entrega',status:S,priority:A,title:'Noite — Disparar email pós-evento',description:'Bloco 11 — Para quem assistiu mas não comprou.',category:'marketing',assignees:BR,dueDate:'2026-04-25'},
+    {area:'entrega',status:S,priority:M,title:'Upload do replay na área de membros',description:'Bloco 11 — Replay para order bump + base.',category:'tech',assignees:PI,dueDate:'2026-04-26'},
   ];
   seed.forEach((t,i) => {
     t.id = 't_seed_' + i + '_' + Math.random().toString(36).slice(2,7);
@@ -1157,7 +1266,7 @@ function seedTasks() {
   });
   tasks = seed;
   save();
-  localStorage.setItem('workflow_seeded_v4','1');
+  localStorage.setItem('workflow_seeded_v5','1');
 }
 
 // ─── INIT ───
